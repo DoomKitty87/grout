@@ -8,6 +8,7 @@ import { useFonts } from 'expo-font'
 import { SplashScreen, Stack } from 'expo-router'
 import { Provider } from 'components/Provider'
 import { useTheme } from 'tamagui'
+import * as SQLite from 'expo-sqlite'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -27,6 +28,19 @@ export default function RootLayout() {
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
   })
+
+  const db = SQLite.openDatabaseSync('tasks.db')
+  db.execSync(`
+    PRAGMA journal_mode = WAL;
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      completed INTEGER NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      completed_at DATETIME,
+      time_spent INTEGER DEFAULT 0
+    );
+  `)
 
   useEffect(() => {
     if (interLoaded || interError) {
