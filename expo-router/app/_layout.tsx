@@ -30,7 +30,7 @@ export default function RootLayout() {
   })
 
   const db = SQLite.openDatabaseSync('tasks.db')
-  db.execSync('PRAGMA user_version = 1;')
+  // db.execSync('PRAGMA user_version = 1;')
   // Check tasks table version
   const result = db.getFirstSync<{ user_version: number }>(`PRAGMA user_version;`)
   let currentVersion = result?.user_version

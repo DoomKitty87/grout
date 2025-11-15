@@ -1,5 +1,5 @@
 import { ExternalLink } from '@tamagui/lucide-icons'
-import { Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button } from 'tamagui'
+import { Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView } from 'tamagui'
 import { ToastControl } from 'components/CurrentToast'
 import { useSQLiteContext } from 'expo-sqlite'
 import { useState, useEffect } from 'react'
@@ -28,18 +28,11 @@ export default function TabOneScreen() {
     fetchTasks();
   }, [])
 
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+
   return (
     <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
-      <H2>Tamagui + Expo</H2>
-
-      <ToastControl />
-
-      <H4>Database Preview:</H4>
-      {tasks.map(task => (
-        <Paragraph key={task.id}>
-          {task.id}: {task.title} (Category: {task.category}, Priority: {task.priority}, Completed: {task.completed ? 'Yes' : 'No'})
-        </Paragraph>
-      ))}
+      <H2>home page</H2>
 
       <Popover>
         <Popover.Trigger asChild>
@@ -49,7 +42,7 @@ export default function TabOneScreen() {
           <YStack>
             <XStack>
               <Label htmlFor="title">Title:</Label>
-              <Input id="title" placeholder="Task title" />
+              <Input id="title" placeholder="Task title" value={newTaskTitle} onChangeText={setNewTaskTitle} />
             </XStack>
 
             <Popover.Close asChild>
@@ -58,8 +51,21 @@ export default function TabOneScreen() {
                   INSERT INTO tasks (title, category, priority, completed)
                   VALUES (?, ?, ?, 0);
                 `);
-                await statement.executeAsync(['New Task', 'General', 1]);
+                const taskName = newTaskTitle;
+                await statement.executeAsync([taskName, 'General', 1]);
                 await statement.finalizeAsync();
+                tasks.push({
+                  id: tasks.length + 1,
+                  title: taskName,
+                  category: 'General',
+                  priority: 1,
+                  due_date: null,
+                  completed: 0,
+                  created_at: new Date().toISOString(),
+                  completed_at: null,
+                  time_spent: 0
+                });
+                setTasks([...tasks]);
               }}>
                 Add
               </Button>
@@ -68,47 +74,14 @@ export default function TabOneScreen() {
         </Popover.Content>
       </Popover>
 
-      <XStack
-        items="center"
-        justify="center"
-        flexWrap="wrap"
-        gap="$1.5"
-        position="absolute"
-        b="$8"
-      >
-        <Paragraph fontSize="$5">Add</Paragraph>
-
-        <Paragraph fontSize="$5" px="$2" py="$1" color="$blue10" bg="$blue5">
-          tamagui.config.ts
+      <H4>Database Preview:</H4>
+      <ScrollView>
+      {tasks.map(task => (
+        <Paragraph key={task.id}>
+          {task.title} (Category: {task.category}, Priority: {task.priority}, Completed: {task.completed ? 'Yes' : 'No'})
         </Paragraph>
-
-        <Paragraph fontSize="$5">to root and follow the</Paragraph>
-
-        <XStack
-          items="center"
-          gap="$1.5"
-          px="$2"
-          py="$1"
-          rounded="$3"
-          bg="$green5"
-          hoverStyle={{ bg: '$green6' }}
-          pressStyle={{ bg: '$green4' }}
-        >
-          <Anchor
-            href="https://tamagui.dev/docs/core/configuration"
-            textDecorationLine="none"
-            color="$green10"
-            fontSize="$5"
-          >
-            Configuration guide
-          </Anchor>
-          <ExternalLink size="$1" color="$green10" />
-        </XStack>
-
-        <Paragraph fontSize="$5" text="center">
-          to configure your themes and tokens.
-        </Paragraph>
-      </XStack>
+      ))}
+      </ScrollView>
     </YStack>
   )
 }
