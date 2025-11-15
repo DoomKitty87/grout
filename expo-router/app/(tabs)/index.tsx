@@ -1,11 +1,32 @@
 import { ExternalLink } from '@tamagui/lucide-icons'
-import { Anchor, H2, H4, Paragraph, XStack, YStack } from 'tamagui'
+import { Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button } from 'tamagui'
 import { ToastControl } from 'components/CurrentToast'
 import { useSQLiteContext } from 'expo-sqlite'
+import { useState, useEffect } from 'react'
+
+interface Task {
+  id: number;
+  title: string;
+  category: string;
+  priority: number;
+  due_date: string | null;
+  completed: number;
+  created_at: string;
+  completed_at: string | null;
+  time_spent: number;
+}
 
 export default function TabOneScreen() {
-  // const db = useSQLiteContext()
+  const db = useSQLiteContext()
 
+  const [tasks, setTasks] = useState<Task[]>([]);
+  useEffect(() => {
+    async function fetchTasks() {
+      const result = await db.getAllAsync<Task>(`SELECT * FROM tasks;`);
+      setTasks(result);
+    }
+    fetchTasks();
+  }, [])
 
   return (
     <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
@@ -14,9 +35,38 @@ export default function TabOneScreen() {
       <ToastControl />
 
       <H4>Database Preview:</H4>
-      <Paragraph>
+      {tasks.map(task => (
+        <Paragraph key={task.id}>
+          {task.id}: {task.title} (Category: {task.category}, Priority: {task.priority}, Completed: {task.completed ? 'Yes' : 'No'})
+        </Paragraph>
+      ))}
 
-      </Paragraph>
+      <Popover>
+        <Popover.Trigger asChild>
+          <Button>Add Task</Button>
+        </Popover.Trigger>
+        <Popover.Content>
+          <YStack>
+            <XStack>
+              <Label htmlFor="title">Title:</Label>
+              <Input id="title" placeholder="Task title" />
+            </XStack>
+
+            <Popover.Close asChild>
+              <Button onPress={async () => {
+                const statement = await db.prepareAsync(`
+                  INSERT INTO tasks (title, category, priority, completed)
+                  VALUES (?, ?, ?, 0);
+                `);
+                await statement.executeAsync(['New Task', 'General', 1]);
+                await statement.finalizeAsync();
+              }}>
+                Add
+              </Button>
+            </Popover.Close>
+          </YStack>
+        </Popover.Content>
+      </Popover>
 
       <XStack
         items="center"

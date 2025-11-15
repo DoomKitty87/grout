@@ -3,7 +3,7 @@ import { TamaguiProvider, type TamaguiProviderProps } from 'tamagui'
 import { ToastProvider, ToastViewport } from '@tamagui/toast'
 import { CurrentToast } from './CurrentToast'
 import { config } from '../tamagui.config'
-import { SQLiteProvider } from 'expo-sqlite'
+import { SQLiteDatabase, SQLiteProvider } from 'expo-sqlite'
 
 export function Provider({ children, ...rest }: Omit<TamaguiProviderProps, 'config'>) {
   const colorScheme = useColorScheme()
