@@ -8,6 +8,7 @@ import { useFonts } from 'expo-font'
 import { SplashScreen, Stack } from 'expo-router'
 import { Provider } from 'components/Provider'
 import { useTheme } from 'tamagui'
+import * as SQLite from 'expo-sqlite'
 
 export {
   // Catch any errors thrown by the Layout component.
