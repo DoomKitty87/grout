@@ -1,6 +1,5 @@
-import { ExternalLink } from '@tamagui/lucide-icons'
-import { Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView } from 'tamagui'
-import { ToastControl } from 'components/CurrentToast'
+import { ExternalLink, Plus, Trash } from '@tamagui/lucide-icons'
+import { Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5 } from 'tamagui'
 import { useSQLiteContext } from 'expo-sqlite'
 import { useState, useEffect } from 'react'
 
@@ -34,53 +33,56 @@ export default function TabOneScreen() {
     <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
       <H2>home page</H2>
 
-      <Popover>
-        <Popover.Trigger asChild>
-          <Button>Add Task</Button>
-        </Popover.Trigger>
-        <Popover.Content>
-          <YStack>
-            <XStack>
-              <Label htmlFor="title">Title:</Label>
-              <Input id="title" placeholder="Task title" value={newTaskTitle} onChangeText={setNewTaskTitle} />
-            </XStack>
-
-            <Popover.Close asChild>
-              <Button onPress={async () => {
-                const statement = await db.prepareAsync(`
-                  INSERT INTO tasks (title, category, priority, completed)
-                  VALUES (?, ?, ?, 0);
-                `);
-                const taskName = newTaskTitle;
-                await statement.executeAsync([taskName, 'General', 1]);
-                await statement.finalizeAsync();
-                tasks.push({
-                  id: tasks.length + 1,
-                  title: taskName,
-                  category: 'General',
-                  priority: 1,
-                  due_date: null,
-                  completed: 0,
-                  created_at: new Date().toISOString(),
-                  completed_at: null,
-                  time_spent: 0
-                });
-                setTasks([...tasks]);
-              }}>
-                Add
-              </Button>
-            </Popover.Close>
-          </YStack>
-        </Popover.Content>
-      </Popover>
+      <XStack>
+        <Input placeholder='Task' value={newTaskTitle} onChangeText={setNewTaskTitle}></Input>
+        <Button onPress={async () => {
+          const statement = await db.prepareAsync(`
+            INSERT INTO tasks (title, category, priority, completed)
+            VALUES (?, ?, ?, 0);
+          `);
+          const taskName = newTaskTitle;
+          if (taskName.trim() === '') {
+            return;
+          }
+          await statement.executeAsync([taskName, 'General', 1]);
+          const result = await db.getAllAsync<Task>(`SELECT * FROM tasks WHERE title = ? ORDER BY id DESC LIMIT 1;`, [taskName]);
+          await statement.finalizeAsync();
+          tasks.push({
+            id: result[0].id,
+            title: taskName,
+            category: 'General',
+            priority: 1,
+            due_date: null,
+            completed: 0,
+            created_at: new Date().toISOString(),
+            completed_at: null,
+            time_spent: 0
+          });
+          setTasks([...tasks]);
+          setNewTaskTitle('');}}>
+          <Plus />
+        </Button>
+      </XStack>
 
       <H4>Database Preview:</H4>
       <ScrollView>
-      {tasks.map(task => (
-        <Paragraph key={task.id}>
-          {task.title} (Category: {task.category}, Priority: {task.priority}, Completed: {task.completed ? 'Yes' : 'No'})
-        </Paragraph>
-      ))}
+          <YStack gap={10}>
+          {tasks.map(task => (
+            <XStack key={task.id} width="100%" justify="space-between">
+              <H5>{task.title}</H5>
+              <Button ml="$4" onPress={async () => {
+                const statement = await db.prepareAsync(`
+                  DELETE FROM tasks WHERE id = ?;
+                `);
+                await statement.executeAsync([task.id]);
+                await statement.finalizeAsync();
+                setTasks(tasks.filter(t => t.id !== task.id));
+              }}>
+                <Trash />
+              </Button>
+            </XStack>
+          ))}
+          </YStack>
       </ScrollView>
     </YStack>
   )
