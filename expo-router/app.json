@@ -43,8 +43,7 @@
           }
         }
       ],
-      "expo-web-browser",
-      "expo-sqlite"
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
