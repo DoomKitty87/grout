@@ -1,27 +1,28 @@
 import { Spacer, Text, YStack, H2, H3, XStack, H5, Separator, ScrollView } from 'tamagui'
 import { useSQLiteContext } from 'expo-sqlite'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useFocusEffect } from 'expo-router'
 
 export default function StatsScreen() {
   const db = useSQLiteContext()
   const [tasksCompleted, setTasksCompleted] = useState(0);
   const [timeSpent, setTimeSpent] = useState(0);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     async function fetchCompletedCount() {
       const completedCount = await db.getFirstAsync<number>(`SELECT COUNT(*) as count FROM tasks WHERE completed = 1;`);
       setTasksCompleted(completedCount!['count'] || 0);
     }
     fetchCompletedCount();
-  }, []);
+  }, []));
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     async function fetchTimeSpent() {
       const totalTime = await db.getFirstAsync<number>(`SELECT SUM(time_spent) as total FROM tasks WHERE completed = 1;`);
       setTimeSpent(totalTime!['total'] || 0);
     }
     fetchTimeSpent();
-  }, []);
+  }, []));
 
   const monthStartDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
