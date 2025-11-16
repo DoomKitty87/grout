@@ -70,10 +70,10 @@ export default function SettingsScreen() {
         <Label>Time Estimation Method:</Label>
         <ToggleGroup value={timeEstimator} type="single" onValueChange={value => setTimeEstimator(value)} orientation='vertical' disableDeactivation={true}>
           <ToggleGroup.Item value="local" borderColor={timeEstimator === 'local' ? '$color12' : undefined}>
-            <Paragraph>Local (Faster, Less Accurate)</Paragraph>
+            <Paragraph>Local NLP (Faster, Less Accurate)</Paragraph>
           </ToggleGroup.Item>
           <ToggleGroup.Item value="api" borderColor={timeEstimator === 'api' ? '$color12' : undefined}>
-            <Paragraph>OpenRouter Gemini API (Slower, More Accurate)</Paragraph>
+            <Paragraph>Embeddings API (Slower, More Accurate)</Paragraph>
           </ToggleGroup.Item>
         </ToggleGroup>
         <Spacer />
