@@ -10,11 +10,9 @@ import Reanimated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated'
-import Animated from 'react-native-reanimated'
 import bm25 from "wink-bm25-text-search";
 import nlp from "wink-nlp-utils";
 import WordPOS from "wordpos";
-import { Blob } from 'expo-blob';
 
 interface Task {
   id: number;
@@ -366,7 +364,7 @@ async function fillEmbeddings(db: SQLiteDatabase): Promise<void> {
 async function estimateTaskTime(db: SQLiteDatabase): Promise<[Task[], number[]]> {
   const uncompletedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 0;`)
 
-  const useEmbeddings = true
+  const useEmbeddings = false
 
   if (useEmbeddings) {
     await fillEmbeddings(db)
