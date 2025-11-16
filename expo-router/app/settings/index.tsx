@@ -60,6 +60,7 @@ export default function SettingsScreen() {
             <Label>Largest</Label>
           </ToggleGroup.Item>
         </ToggleGroup>
+        <Label>Time Estimation Method:</Label>
         <ToggleGroup value={timeEstimator} type="single" onValueChange={value => setTimeEstimator(value)}>
           <ToggleGroup.Item value="local">
             <Label>Local (Faster, Less Accurate)</Label>

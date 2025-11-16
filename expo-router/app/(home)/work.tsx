@@ -4,6 +4,7 @@ import { ToastControl } from 'components/CurrentToast'
 import { useSQLiteContext, SQLiteDatabase } from 'expo-sqlite'
 import { useState, useEffect } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 interface Task {
   id: number;
@@ -21,10 +22,12 @@ export default function WorkScreen() {
   const router = useRouter();
   const availableTime = useLocalSearchParams().time ? parseInt(useLocalSearchParams().time as string) : 0;
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [additionalTasksBuffer, setAdditionalTasksBuffer] = useState<Task[]>([]);
   useEffect(() => {
     async function fetchTasks() {
-      const tasksToDo = await pickTasksToDo(db, availableTime)
+      const [tasksToDo, additionalTasksBuffer] = await pickTasksToDo(db, availableTime)
       setTasks(tasksToDo);
+      setAdditionalTasksBuffer(additionalTasksBuffer);
     }
     fetchTasks();
   }, [])
@@ -48,6 +51,13 @@ export default function WorkScreen() {
               `);
               setLastFinishedTime(now);
               setTasks(tasks.filter(t => t.id !== task.id));
+              if (tasks.length === 0) {
+                if (additionalTasksBuffer.length > 0) {
+                  const nextTask = additionalTasksBuffer[0];
+                  setTasks([nextTask]);
+                  setAdditionalTasksBuffer(additionalTasksBuffer.slice(1));
+                }
+              }
             }}>
               <H4 key={task.id}>{task.title} - Estimated time: {Math.ceil((task as any).estimatedTime)} mins</H4>
             </Button>
@@ -74,22 +84,29 @@ export default function WorkScreen() {
   )
 }
 
-async function pickTasksToDo(db: SQLiteDatabase, availableTime: number): Promise<Task[]> {
+function sortTaskList(tasks: Task[], method: string): Task[] {
+  switch (method) {
+    case 'largest':
+      return tasks.sort((a, b) => b.estimated_time - a.estimated_time);
+    case 'smallest':
+      return tasks.sort((a, b) => a.estimated_time - b.estimated_time);
+    default:
+      return tasks;
+  }
+}
+
+async function pickTasksToDo(db: SQLiteDatabase, availableTime: number): Promise<[Task[], Task[]]> {
   // Temporary function to just return all unfinished tasks
   // return db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 0;`);
 
   const tasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 0;`);
 
+  const organizeByMethod = await AsyncStorage.getItem('organizeBy') || '';
+  const addByMethod = await AsyncStorage.getItem('addBy') || '';
   const toWorkOn: Task[] = [];
+  const tasksSorted = sortTaskList(tasks, organizeByMethod);
   let timeLeft = availableTime;
-
-  tasks.sort((a, b) => {
-    return a.estimated_time - b.estimated_time;
-  });
-
-  // TODO: Implement algorithms that people can choose (read settings)
-
-  for (const task of tasks) {
+  for (const task of tasksSorted) {
     const estimatedTime = task.estimated_time;
     if (estimatedTime <= timeLeft) {
       toWorkOn.push(task);
@@ -97,5 +114,7 @@ async function pickTasksToDo(db: SQLiteDatabase, availableTime: number): Promise
     }
   }
 
-  return toWorkOn;
+  const leftoverTasks = sortTaskList(tasks.filter(t => !toWorkOn.includes(t)), addByMethod === 'continue' ? organizeByMethod : '');
+
+  return [toWorkOn, leftoverTasks];
 }
