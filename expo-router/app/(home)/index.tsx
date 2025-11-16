@@ -134,6 +134,7 @@ export default function HomeScreen() {
           setNewTaskTitle('');
           const updatedTasks = await updateTaskEstimations(db);
           setTasks(updatedTasks);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           }}>
           <Plus />
         </Button>

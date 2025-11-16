@@ -67,6 +67,7 @@ export default function WorkScreen() {
         setAdditionalTasksBuffer(additionalTasksBuffer.slice(1));
       }
     }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }
 
   return (
