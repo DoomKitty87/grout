@@ -43,7 +43,6 @@ export default function HomeScreen() {
   }, []))
 
   const [newTaskTitle, setNewTaskTitle] = useState('')
-  const [newTaskCategory, setNewTaskCategory] = useState('General')
   const [workHr, setWorkHr] = useState(0);
   const [workMin, setWorkMin] = useState(0);
 
@@ -395,7 +394,7 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
 
 async function estimateTimesEmbeddings(db: SQLiteDatabase, tasks: Task[]): Promise<number[]> {
   // Use embeddings stored in db to estimate task times
-  const completedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 1;`)
+  const completedTasks = await db.getAllAsync<Task>(`SELECT * FROM tasks WHERE completed = 1;`)
 
   const DEFAULT_ESTIMATE = await AsyncStorage.getItem('defaultEstimate').then(val => val ? parseInt(val) : 30)
   const ESTIMATION_SAMPLES = 5;
@@ -463,19 +462,21 @@ async function fillEmbeddings(db: SQLiteDatabase): Promise<void> {
       WHERE id = ${task.id};
     `);
   }
+
+  return;
 }
 
 async function estimateTaskTime(db: SQLiteDatabase): Promise<[Task[], number[]]> {
-  const uncompletedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 0;`)
-
   const timeEstimator = await AsyncStorage.getItem('timeEstimator') || 'local';
   const useEmbeddings = timeEstimator === 'api';
 
   if (useEmbeddings) {
     await fillEmbeddings(db)
+    const uncompletedTasks = await db.getAllAsync<Task>(`SELECT * FROM tasks WHERE completed = 0;`)
     const estimates = await estimateTimesEmbeddings(db, uncompletedTasks)
     return [uncompletedTasks, estimates]
   } else {
+    const uncompletedTasks = await db.getAllAsync<Task>(`SELECT * FROM tasks WHERE completed = 0;`)
     const estimates = await estimateTimesBM25(db, uncompletedTasks)
     return [uncompletedTasks, estimates]
   }
