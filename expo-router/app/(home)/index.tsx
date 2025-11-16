@@ -1,7 +1,8 @@
 import { Check, ExternalLink, Plus, Trash, Play } from '@tamagui/lucide-icons'
 import { Square, H3, Separator, Checkbox, Text, Spacer, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
+import { useFocusEffect } from 'expo-router'
 import { useRouter } from 'expo-router';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import Reanimated, {
@@ -30,13 +31,13 @@ export default function HomeScreen() {
   const router = useRouter()
 
   const [tasks, setTasks] = useState<Task[]>([])
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     async function fetchTasks() {
       const result = await updateTaskEstimations(db)
       setTasks(result)
     }
     fetchTasks()
-  }, [])
+  }, []))
 
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [newTaskCategory, setNewTaskCategory] = useState('General')
@@ -81,6 +82,7 @@ export default function HomeScreen() {
             estimated_time: 0,
           });
           setTasks([...tasks])
+          await updateTaskEstimations(db);
           setNewTaskTitle('');}}>
           <Plus />
         </Button>
