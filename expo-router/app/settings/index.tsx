@@ -26,6 +26,8 @@ export default function SettingsScreen() {
     fetchSettings();
   }, []);
 
+  const db = useSQLiteContext();
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <YStack minH="100%">
@@ -70,9 +72,7 @@ export default function SettingsScreen() {
         }}>Reset to Defaults</Button>
         <Button onPress={async () => {
           Keyboard.dismiss();
-          const db = useSQLiteContext();
           db.execSync(`DELETE FROM tasks;`);
-          await AsyncStorage.clear();
         }}>
           Clear All Tasks & History
         </Button>
