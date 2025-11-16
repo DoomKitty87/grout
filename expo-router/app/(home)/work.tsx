@@ -171,8 +171,8 @@ function TaskItem({task, onTaskComplete}) {
       key={task.id} 
       backgroundColor="$color2" 
       borderColor="$borderColor" borderWidth={1} borderRadius="$5"
-      mx="$7"
-      height={task.estimated_time * 2 + 20}
+      mx="$5"
+      height={(task.estimated_time * 2) + 40}
       py="$2"
       onPress={handleTaskComplete}
     >
