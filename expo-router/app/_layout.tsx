@@ -34,6 +34,7 @@ export default function RootLayout() {
   // Check tasks table version
   const result = db.getFirstSync<{ user_version: number }>(`PRAGMA user_version;`)
   let currentVersion = result?.user_version
+  console.log('Current DB version:', currentVersion)
   if (currentVersion === undefined) {
     currentVersion = -1
   }
