@@ -4663,6 +4663,11 @@ open@^8.0.4:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
+openai@^6.9.0:
+  version "6.9.0"
+  resolved "https://registry.npmjs.org/openai/-/openai-6.9.0.tgz"
+  integrity sha512-n2sJRYmM+xfJ0l3OfH8eNnIyv3nQY7L08gZQu3dw6wSdfPtKAk92L83M2NIP5SS8Cl/bsBBG3yKzEOjkx0O+7A==
+
 opener@^1.5.2:
   version "1.5.2"
 
@@ -6055,14 +6060,20 @@ ws@^6.2.3:
   dependencies:
     async-limiter "~1.0.0"
 
-ws@^7, ws@^7.5.10:
+ws@^7:
   version "7.5.10"
+  resolved "https://registry.npmjs.org/ws/-/ws-7.5.10.tgz"
+  integrity sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==
 
-ws@^8.12.1:
-  version "8.18.3"
+ws@^7.5.10:
+  version "7.5.10"
+  resolved "https://registry.npmjs.org/ws/-/ws-7.5.10.tgz"
+  integrity sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==
 
-ws@^8.18.3:
+ws@^8.12.1, ws@^8.18.0, ws@^8.18.3:
   version "8.18.3"
+  resolved "https://registry.npmjs.org/ws/-/ws-8.18.3.tgz"
+  integrity sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==
 
 xcode@^3.0.1:
   version "3.0.1"
@@ -6114,5 +6125,5 @@ yocto-queue@^0.1.0:
 zod-to-json-schema@^3.24.6:
   version "3.24.6"
 
-zod@^3.24.1, zod@^3.25.76:
+zod@^3.24.1, "zod@^3.25 || ^4.0", zod@^3.25.76:
   version "3.25.76"

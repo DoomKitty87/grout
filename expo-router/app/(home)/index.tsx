@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import bm25 from "wink-bm25-text-search";
 import nlp from "wink-nlp-utils";
 import WordPOS from "wordpos";
+import OpenAI from 'openai';
 
 interface Task {
   id: number;
@@ -15,6 +16,7 @@ interface Task {
   completed_at: string | null;
   time_spent: number;
   estimated_time: number;
+  embedding?: number[];
 }
 
 export default function HomeScreen() {
@@ -244,13 +246,68 @@ async function estimateTimesBM25(db: SQLiteDatabase, tasks: Task[]): Promise<num
   return estimates; 
 }
 
+function cosineSimilarity(vecA: number[], vecB: number[]): number {
+  const dotProduct = vecA.reduce((sum, a, idx) => sum + a * (vecB[idx] || 0), 0);
+  const magnitudeA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
+  const magnitudeB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
+  if (magnitudeA === 0 || magnitudeB === 0) {
+    return 0;
+  }
+
+  return dotProduct / (magnitudeA * magnitudeB);
+}
+
 async function estimateTimesEmbeddings(db: SQLiteDatabase, tasks: Task[]): Promise<number[]> {
   // Use embeddings stored in db to estimate task times
-  return tasks.map(_ => 30); // Placeholder implementation
+  const completedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 1;`)
+
+  let totalTime = 0;
+  let totalSimilarity = 0;
+
+  const estimates: number[] = []
+
+  for (const task of tasks) {
+    for (const completedTask of completedTasks) {
+      const similarity = cosineSimilarity(task.embedding || [], completedTask.embedding || []);
+      console.log(`Cosine similarity between "${task.title}" and completed task "${completedTask.title}": ${similarity}`);
+      totalTime += completedTask.time_spent * similarity;
+      totalSimilarity += similarity;
+    }
+    const estimatedTime = totalSimilarity > 0 ? totalTime / totalSimilarity : 30;
+    console.log(`Estimated time for task "${task.title}": ${estimatedTime}`);
+    estimates.push(estimatedTime);
+  }
+
+  return estimates;
 }
 
 async function fillEmbeddings(db: SQLiteDatabase): Promise<void> {
   // Fill in missing embeddings for tasks
+  const tasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE embedding IS NULL OR embedding = '';`)
+
+  const openai = new OpenAI({
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY,
+  })
+
+  const embeddings = await openai.embeddings.create({
+    model: 'google/gemini-embedding-001',
+    input: tasks.map(t => t.title),
+    encoding_format: 'float',
+  })
+
+  console.log('Fetched embeddings from OpenAI:', embeddings);
+
+  for (let i = 0; i < tasks.length; i++) {
+    const task = tasks[i];
+    const embedding = embeddings.data[i].embedding;
+    console.log(`Storing embedding for task "${task.title}":`, embedding);
+    await db.execAsync(`
+      UPDATE tasks
+      SET embedding = ${embedding}
+      WHERE id = ${task.id};
+    `);
+  }
 }
 
 async function estimateTaskTime(db: SQLiteDatabase): Promise<[Task[], number[]]> {
