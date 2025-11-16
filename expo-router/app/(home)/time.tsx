@@ -1,5 +1,5 @@
 import { ExternalLink } from '@tamagui/lucide-icons'
-import { Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView } from 'tamagui'
+import { Spacer, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView } from 'tamagui'
 import { ToastControl } from 'components/CurrentToast'
 import { useSQLiteContext } from 'expo-sqlite'
 import { useState, useEffect } from 'react'
@@ -24,8 +24,7 @@ export default function WorkScreen() {
   const [hours, setHours] = useState(0);
 
   return (
-    <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
-      <Button onPress={() => router.back()}>Cancel</Button>
+    <YStack flex={1} justify="center" items="center" gap="$8" px="$8" pt="$15" pb="$8" bg="$background">
       
       <XStack maxH={100}>
         <ScrollView onScroll={(e) => {
@@ -52,9 +51,15 @@ export default function WorkScreen() {
             ))}
         </ScrollView>
       </XStack>
-
-      <H2>Time selection</H2>
-      <Button onPress={() => router.push({ pathname: 'work', params: { time: (hours * 60) + minutes }})}>Start Work</Button>
+      <YStack width="100%">
+      <XStack>
+      <Button size="$5" grow={1} onPress={() => router.back()}>Cancel</Button>
+      </XStack>
+      <Spacer />
+      <XStack>
+      <Button size="$5" grow={1} onPress={() => router.push({ pathname: 'work', params: { time: (hours * 60) + minutes }})}>Start Work</Button>
+      </XStack>
+      </YStack>
     </YStack>
   )
 }
