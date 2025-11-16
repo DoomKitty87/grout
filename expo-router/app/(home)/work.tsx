@@ -1,4 +1,4 @@
-import { Check, StopCircle } from '@tamagui/lucide-icons'
+import { Check, StopCircle, Circle } from '@tamagui/lucide-icons'
 import { Spacer, Separator, Text, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, Checkbox } from 'tamagui'
 import { ToastControl } from 'components/CurrentToast'
 import { useSQLiteContext, SQLiteDatabase } from 'expo-sqlite'
@@ -176,8 +176,11 @@ function TaskItem({task, onTaskComplete}) {
       py="$2"
       onPress={handleTaskComplete}
     >
-      <XStack width="100%" justify="space-between"  height="100%">
-        <Paragraph width="85%" fontSize="$4">{task.title}</Paragraph>
+      <XStack width="100%" justify="space-between" height="100%" alignItems="flex-start">
+        <XStack gap="$2" alignItems="center" l={-2}>
+          <Circle size={16} />
+          <Paragraph fontSize="$4">{task.title}</Paragraph>
+        </XStack>
         <Paragraph text="right" width="15%" fontSize="$2" color="$color10">{Math.ceil(task.estimated_time)} min</Paragraph>
       </XStack>
     </Button>
