@@ -2,6 +2,7 @@ import { ExternalLink, Plus, Trash } from '@tamagui/lucide-icons'
 import { Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'expo-router';
 
 interface Task {
   id: number;
@@ -17,6 +18,7 @@ interface Task {
 
 export default function HomeScreen() {
   const db = useSQLiteContext()
+  const router = useRouter();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   useEffect(() => {
@@ -105,6 +107,9 @@ export default function HomeScreen() {
           ))}
           </YStack>
       </ScrollView>
+      <YStack >
+        <Button onPress={() => router.push('work')}>Start Work Session</Button>
+      </YStack>
     </YStack>
   )
 }
