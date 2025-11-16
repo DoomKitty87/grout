@@ -37,7 +37,7 @@ export default function RootLayout() {
   if (currentVersion === undefined) {
     currentVersion = -1
   }
-  const DATABASE_VERSION = 4
+  const DATABASE_VERSION = 5
   if (currentVersion < DATABASE_VERSION) {
     // Perform initial setup or migrations here
     db.execSync(`
@@ -57,7 +57,7 @@ export default function RootLayout() {
       completed_at DATETIME,
       time_spent INTEGER DEFAULT 0,
       estimated_time INTEGER DEFAULT 0,
-      embedding BLOB,
+      embedding BLOB
     );
   `)
 
