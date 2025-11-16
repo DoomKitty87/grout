@@ -28,21 +28,48 @@ export default function WorkScreen() {
     }
     fetchTasks();
   }, [])
-  console.log('Available time (mins):', availableTime);
+  const [lastFinishedTime, setLastFinishedTime] = useState(Date.now());
   return (
     <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
-      <Button onPress={() => {
-        router.back()
-        router.back()
-      }}>End Session</Button> 
       <H2>work page</H2>
       <ScrollView>
         <YStack gap="$4" pb="$10">
           {tasks.map((task) => (
-            <H4 key={task.id}>{task.title} - Estimated time: {Math.ceil((task as any).estimatedTime)} mins</H4>
+            <Button key={task.id} onPress={() => {
+              const now = Date.now();
+              const elapsedMinutes = Math.floor((now - lastFinishedTime) / 60000);
+              const timeToLog = Math.min(elapsedMinutes, (task as any).estimatedTime);
+              db.execSync(`
+                UPDATE tasks
+                SET time_spent = time_spent + ${timeToLog},
+                completed = 1,
+                completed_at = CURRENT_TIMESTAMP
+                WHERE id = ${task.id};
+              `);
+              setLastFinishedTime(now);
+              setTasks(tasks.filter(t => t.id !== task.id));
+            }}>
+              <H4 key={task.id}>{task.title} - Estimated time: {Math.ceil((task as any).estimatedTime)} mins</H4>
+            </Button>
           ))}
         </YStack>
       </ScrollView>
+      <Button onPress={() => {
+        if (tasks.length > 0) {
+          const now = Date.now();
+          const elapsedMinutes = Math.floor((now - lastFinishedTime) / 60000);
+          const task = tasks[0];
+          const timeToLog = Math.min(elapsedMinutes, (task as any).estimatedTime);
+          db.execSync(`
+            UPDATE tasks
+            SET time_spent = time_spent + ${timeToLog}
+            WHERE id = ${task.id};
+          `);
+          setLastFinishedTime(now);
+        }
+        router.back()
+        router.back()
+      }}>End Session</Button>
     </YStack>
   )
 }
