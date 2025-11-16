@@ -1,8 +1,9 @@
-import { H2, Image, XStack, YStack, ToggleGroup, Input, Label, Button, Paragraph, Spacer } from 'tamagui'
+import { View, H2, Image, XStack, YStack, ToggleGroup, Input, Label, Button, Paragraph, Spacer, useTheme } from 'tamagui'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
+import Svg, { SvgProps, G, Rect, Text, TSpan } from 'react-native-svg';
 
 export default function SettingsScreen() {
   const [defaultEstimate, setDefaultEstimate] = useState(30);
@@ -37,11 +38,9 @@ export default function SettingsScreen() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <YStack minH="100%" padding="$5" bg="$background">
         <XStack width="100%" justify="center" items="center">
-          <Image
-            source={require("assets/images/qhlogo.png")}
-            height="$1"
-            resizeMode="contain"
-          />
+          <View style={{ width: 24, height: 35 }}>
+            <SvgComponent style={{ transform: [{ scale: 0.35 }, { translateX: -680 }, { translateY: -670 }] }} color={useTheme().color12.val} />
+          </View>
         </XStack>
         <Spacer />
         <Label>Default Task Time Estimate</Label>
@@ -143,3 +142,83 @@ export default function SettingsScreen() {
     </TouchableWithoutFeedback>
   )
 }
+
+const SvgComponent = (props: SvgProps) => (
+  <Svg xmlns="http://www.w3.org/2000/svg" width={512} height={512} {...props}>
+    <G transform="matrix(.6308 0 0 .6308 76.356 142.06)">
+      <Rect
+        width={95.799}
+        height={35.065}
+        x={-93.943}
+        y={-246.717}
+        ry={5}
+        style={{
+          fill: props.color || "#000",
+        }}
+        transform="rotate(-179.67)"
+      />
+      <Rect
+        width={95.799}
+        height={35.065}
+        x={-164.243}
+        y={-166.493}
+        ry={5}
+        style={{
+          fill: props.color || "#000",
+        }}
+        transform="rotate(-179.67)"
+      />
+      <Rect
+        width={95.799}
+        height={35.065}
+        x={-124.81}
+        y={-205.411}
+        ry={5}
+        style={{
+          fill: props.color || "#000",
+        }}
+        transform="rotate(-179.67)"
+      />
+      <Rect
+        width={95.799}
+        height={35.065}
+        x={182.315}
+        y={14.87}
+        ry={5}
+        style={{
+          fill: props.color || "#000",
+        }}
+        transform="rotate(24.685)"
+      />
+    </G>
+    <Text
+      xmlSpace="preserve"
+      x={266.34}
+      y={281.797}
+      style={{
+        fontSize: 96,
+        textAlign: "start",
+        writingMode: "lr-tb",
+        direction: "ltr",
+        textAnchor: "start",
+        fill: props.color || "#000",
+      }}
+    >
+      <TSpan
+        x={266.34}
+        y={281.797}
+        style={{
+          fontStyle: "normal",
+          fontVariant: "normal",
+          fontWeight: 700,
+          fontStretch: "normal",
+          fontSize: 96,
+          fontFamily: "&quot",
+          InkscapeFontSpecification: "&quot",
+        }}
+      >
+        {"grt"}
+      </TSpan>
+    </Text>
+  </Svg>
+)
