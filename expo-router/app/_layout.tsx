@@ -1,5 +1,3 @@
-import '../tamagui-web.css'
-
 import { useEffect } from 'react'
 import { useColorScheme } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
@@ -35,10 +33,11 @@ export default function RootLayout() {
   // Check tasks table version
   const result = db.getFirstSync<{ user_version: number }>(`PRAGMA user_version;`)
   let currentVersion = result?.user_version
+  console.log('Current DB version:', currentVersion)
   if (currentVersion === undefined) {
     currentVersion = -1
   }
-  const DATABASE_VERSION = 1
+  const DATABASE_VERSION = 2
   if (currentVersion < DATABASE_VERSION) {
     // Perform initial setup or migrations here
     db.execSync(`
@@ -109,6 +108,7 @@ function RootLayoutNav() {
           name="(home)"
           options={{
             title: 'Home',
+            headerShown: false,
             tabBarIcon: ({ color }) => <Home color={color as any} />,
           }}
         />

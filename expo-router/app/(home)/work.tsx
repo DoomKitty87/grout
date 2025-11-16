@@ -3,6 +3,7 @@ import { Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Butto
 import { ToastControl } from 'components/CurrentToast'
 import { useSQLiteContext } from 'expo-sqlite'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'expo-router';
 
 interface Task {
   id: number;
@@ -18,7 +19,8 @@ interface Task {
 
 export default function WorkScreen() {
   const db = useSQLiteContext()
-
+  const router = useRouter();
+  
   const [tasks, setTasks] = useState<Task[]>([]);
   useEffect(() => {
     async function fetchTasks() {
@@ -32,6 +34,7 @@ export default function WorkScreen() {
 
   return (
     <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
+      <Button onPress={() => router.back()}>End Session</Button> 
       <H2>work page</H2>
     </YStack>
   )
