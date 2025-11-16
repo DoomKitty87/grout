@@ -8,6 +8,7 @@ export default function HomeLayout() {
   return (
     <Stack>
       <Stack.Screen name='index' options={{ headerShown: false }}/>
+      <Stack.Screen name='time' options={{ headerShown: false }} />
       <Stack.Screen name='work' options={{ headerShown: false }} />
     </Stack>
   )
