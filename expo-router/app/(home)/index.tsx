@@ -90,7 +90,7 @@ export default function HomeScreen() {
         borderColor="$borderColor" 
         icon={Play} 
         size="$5" 
-        grow={1} 
+        grow={1}
         onPress={() => {
           router.push({ pathname: 'work', params: { time: (workHr * 60) + workMin }})
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -197,14 +197,14 @@ function WorkTimer({ setHour, setMin }) {
             onScroll={(e) => {
               const contentOffsetY = e.nativeEvent.contentOffset.y;
               const itemHeight = numSize; // Approximate height of each H2 item
-              const selectedMin = clamp(Math.round(contentOffsetY / itemHeight) * 5, 0, 55);
+              const selectedMin = clamp(Math.round(contentOffsetY / itemHeight) * 5 + 5, 5, 55);
               setMin(selectedMin);
             }}
           >
           {
             Array.from(
-              { length: 12 }, 
-              (_, i) => String(i * 5).padStart(2, '0')
+              { length: 11 }, 
+              (_, i) => String((i + 1) * 5).padStart(2, '0')
             ).map((t) => (
               <YStack key={t} height={numSize} justify="center" items="center">
                 <H2 fontWeight={400}>{t}</H2>
