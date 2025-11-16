@@ -26,7 +26,7 @@ export default function StatsScreen() {
   const monthStartDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
 
-  const rows = Math.ceil((daysInMonth + monthStartDay) / 7);
+  const columns = Math.ceil((daysInMonth + monthStartDay) / 7);
   console.log(timeSpent);
   console.log(tasksCompleted);
 
@@ -65,17 +65,17 @@ export default function StatsScreen() {
           }
         </YStack>
         <YStack borderColor="$color4" borderWidth={1} borderRadius="$3" p="$4" gap="$2">
-          <Text fontWeight="bold">Task Completion Calendar</Text>
+          <Text fontWeight="bold">Task Completion Frequency</Text>
           <Separator />
-          <YStack width="100%" pt="$2">
+          <XStack width="100%" pt="$2" gap="$1" justify="center">
             {
-              Array.from({ length: rows }).map((_, rowIndex) => (
-                <XStack key={rowIndex} flexDirection="row" gap="$1">
+              Array.from({ length: 16 }).map((_, columnIndex) => (
+                <YStack key={columnIndex} flexDirection="column" gap="$1">
                   {
-                    Array.from({ length: 16 }).map((_, colIndex) => {
-                      const dayOfMonth = rowIndex * 7 + colIndex - monthStartDay + 1;
+                    Array.from({ length: 7 }).map((_, colIndex) => {
+                      const dayOfMonth = columnIndex * 7 + colIndex - monthStartDay + 1;
                       if (dayOfMonth < 0 || dayOfMonth >= daysInMonth) {
-                        return <YStack key={colIndex} width={20} height={20} borderWidth={1} marginBlockEnd="$1" borderColor="$color3" borderRadius="$2" backgroundColor="$color2"/>;
+                        return <XStack key={colIndex} width={20} height={20} borderWidth={1} borderColor="$color3" borderRadius="$2" backgroundColor="$color2"/>;
                       }
                       // Fetch number of tasks completed on this day
                       const dateStr = new Date(new Date().getFullYear(), new Date().getMonth(), dayOfMonth).toISOString().split('T')[0];
@@ -88,16 +88,16 @@ export default function StatsScreen() {
                       } else if (tasksCompletedOnDay >= 1) {
                         bgColor = '#216e39';
                       }
-                      return <YStack key={colIndex} width={20} height={20} borderWidth={1} marginBlockEnd="$1" borderColor="$color3" borderRadius="$2" backgroundColor={bgColor} />;;
+                      return <YStack key={colIndex} width={20} height={20} borderWidth={1} borderColor="$color3" borderRadius="$2" backgroundColor={bgColor} />;;
                     })
                   }
-                </XStack>
+                </YStack>
               ))
             }
-          </YStack>
+          </XStack>
         </YStack>
         <YStack borderColor="$color4" borderWidth={1} borderRadius="$3" p="$4" gap="$2">
-          <Text fontWeight="bold">Tasks By Time To Complete</Text>
+          <Text fontWeight="bold">Task Completion Time</Text>
           <Separator />
           <YStack width="100%" gap="$2" pt="$2">
               {

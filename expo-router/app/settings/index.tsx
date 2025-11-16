@@ -1,4 +1,4 @@
-import { H2, YStack, ToggleGroup, Input, Label, Button, Paragraph, Spacer } from 'tamagui'
+import { H2, Image, XStack, YStack, ToggleGroup, Input, Label, Button, Paragraph, Spacer } from 'tamagui'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { Keyboard, TouchableWithoutFeedback } from 'react-native';
@@ -36,6 +36,14 @@ export default function SettingsScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <YStack minH="100%" padding="$5" bg="$background">
+        <XStack width="100%" justify="center" items="center">
+          <Image
+            source={require("assets/images/qhlogo.png")}
+            height="$1"
+            resizeMode="contain"
+          />
+        </XStack>
+        <Spacer />
         <Label>Default Task Time Estimate</Label>
         <Input value={defaultEstimate.toString()} inputMode="numeric" onChangeText={text => setDefaultEstimate(parseInt(text) || 0)}></Input>
         <Label>Organize Tasks By:</Label>
@@ -65,7 +73,7 @@ export default function SettingsScreen() {
             <Paragraph>Local (Faster, Less Accurate)</Paragraph>
           </ToggleGroup.Item>
           <ToggleGroup.Item value="api" borderColor={timeEstimator === 'api' ? '$color12' : undefined}>
-            <Paragraph>API (Slower, More Accurate)</Paragraph>
+            <Paragraph>OpenRouter Gemini API (Slower, More Accurate)</Paragraph>
           </ToggleGroup.Item>
         </ToggleGroup>
         <Spacer />

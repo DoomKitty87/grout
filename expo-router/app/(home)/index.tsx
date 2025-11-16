@@ -1,5 +1,5 @@
 import { Check, ExternalLink, Plus, Trash, Play } from '@tamagui/lucide-icons'
-import { Square, H1, H3, Separator, Checkbox, Text, Spacer, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
+import { Image, Square, H1, H3, Separator, Checkbox, Text, Spacer, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { useState, useCallback } from 'react'
 import { useFocusEffect } from 'expo-router'
@@ -57,10 +57,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <YStack flex={1} items="center" gap={0} pt="$13" pb="$8" bg="$background">
-      <XStack marginTop={-40} marginBottom={30} borderWidth={1} borderColor="$borderColor">{[...Array(24).keys()].map((hour) => (
-          <H5 marginTop={-5} fontWeight={200} marginBottom={-5} key={hour} color="$color10" transform="skewX(-25deg)">Grout </H5>
-      ))}</XStack>
+    <YStack flex={1} items="center" gap={0} pt="$11" bg="$background">
       <Spacer />
       <WorkTimer setHour={setWorkHr} setMin={setWorkMin}/>
       <Spacer />
