@@ -5,10 +5,11 @@ import { useColorScheme } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
-import { SplashScreen, Stack } from 'expo-router'
-import { Provider } from 'components/Provider'
+import { SplashScreen, Tabs } from 'expo-router'
+import { Provider } from '../components/Provider'
 import { useTheme } from 'tamagui'
 import * as SQLite from 'expo-sqlite'
+import { Home, Settings } from '@tamagui/lucide-icons'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -91,28 +92,35 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-      <Stack>
-        <Stack.Screen
-          name="(tabs)"
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: theme.red10.val,
+          tabBarStyle: {
+            backgroundColor: theme.background.val,
+            borderTopColor: theme.borderColor.val,
+          },
+          headerStyle: {
+            backgroundColor: theme.background.val,
+            borderBottomColor: theme.borderColor.val,
+          },
+          headerTintColor: theme.color.val,
+        }}
+      >
+        <Tabs.Screen
+          name="(home)"
           options={{
-            headerShown: false,
+            title: 'Home',
+            tabBarIcon: ({ color }) => <Home color={color as any} />,
           }}
         />
-
-        <Stack.Screen
-          name="modal"
+        <Tabs.Screen
+          name="settings/index"
           options={{
-            title: 'Tamagui + Expo',
-            presentation: 'modal',
-            animation: 'slide_from_right',
-            gestureEnabled: true,
-            gestureDirection: 'horizontal',
-            contentStyle: {
-              backgroundColor: theme.background.val,
-            },
+            title: 'Settings',
+            tabBarIcon: ({ color }) => <Settings color={color as any} />,
           }}
         />
-      </Stack>
+      </Tabs>
     </ThemeProvider>
   )
 }

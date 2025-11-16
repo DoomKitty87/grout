@@ -45,9 +45,6 @@
       ],
       "expo-web-browser",
       "expo-sqlite"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
+    ]
   }
 }

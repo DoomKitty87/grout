@@ -15,7 +15,7 @@ interface Task {
   time_spent: number;
 }
 
-export default function TabOneScreen() {
+export default function HomeScreen() {
   const db = useSQLiteContext()
 
   const [tasks, setTasks] = useState<Task[]>([]);
