@@ -17,6 +17,7 @@ import nlp from "wink-nlp-utils";
 import WordPOS from "wordpos";
 import Animated from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Keyboard } from 'react-native';
 
 interface Task {
   id: number;
@@ -104,8 +105,11 @@ export default function HomeScreen() {
             estimated_time: 0,
           });
           setTasks([...tasks])
-          await updateTaskEstimations(db);
-          setNewTaskTitle('');}}>
+          Keyboard.dismiss();
+          setNewTaskTitle('');
+          const updatedTasks = await updateTaskEstimations(db);
+          setTasks(updatedTasks);
+          }}>
           <Plus />
         </Button>
       </XStack>
@@ -286,7 +290,7 @@ async function expandSynonyms(text: string, wordpos: WordPOS): Promise<string> {
 
 async function estimateTimesBM25(db: SQLiteDatabase, tasks: Task[]): Promise<number[]> {
   // Use BM25 engine to estimate task times
-  const ESTIMATION_SAMPLES = 5;
+  const ESTIMATION_SAMPLES = 3;
   const DEFAULT_ESTIMATE = await AsyncStorage.getItem('defaultEstimate').then(val => val ? parseInt(val) : 30)
 
   const completedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 1;`)
@@ -366,10 +370,9 @@ async function estimateTimesBM25(db: SQLiteDatabase, tasks: Task[]): Promise<num
     let totalTime = 0;
     let totalScore = 0;
     for (let i = 0; i < Math.min(ESTIMATION_SAMPLES, results.length); i++) {
-
-        totalTime += taskById[parseInt(results[i][0])].time_spent * results[i][1];
+        totalTime += taskById[parseInt(results[i][0])].time_spent * Math.pow(results[i][1], 8);
         console.log(`  Considering completed task "${taskById[parseInt(results[i][0])].title}" with time spent ${taskById[parseInt(results[i][0])].time_spent} and score ${results[i][1]}`);
-        totalScore += results[i][1];
+        totalScore += Math.pow(results[i][1], 8);
     }
 
     console.log(`Total time: ${totalTime}, Total score: ${totalScore}`);
@@ -398,7 +401,7 @@ async function estimateTimesEmbeddings(db: SQLiteDatabase, tasks: Task[]): Promi
   const completedTasks = await db.getAllAsync<Task>(`SELECT * FROM tasks WHERE completed = 1;`)
 
   const DEFAULT_ESTIMATE = await AsyncStorage.getItem('defaultEstimate').then(val => val ? parseInt(val) : 30)
-  const ESTIMATION_SAMPLES = 5;
+  const ESTIMATION_SAMPLES = 3;
   let totalTime = 0;
   let totalSimilarity = 0;
 
@@ -407,7 +410,7 @@ async function estimateTimesEmbeddings(db: SQLiteDatabase, tasks: Task[]): Promi
   for (const task of tasks) {
     const similarities: { similarity: number; timeSpent: number }[] = []
     for (const completedTask of completedTasks) {
-      const similarity = cosineSimilarity(JSON.parse(task.embedding || "[]"), JSON.parse(completedTask.embedding || "[]"));
+      const similarity = Math.pow(cosineSimilarity(JSON.parse(task.embedding || "[]"), JSON.parse(completedTask.embedding || "[]")), 8);
       console.log(`Cosine similarity between "${task.title}" and completed task "${completedTask.title}": ${similarity}`);
       similarities.push({ similarity, timeSpent: completedTask.time_spent });
     }
