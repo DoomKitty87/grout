@@ -48,6 +48,8 @@ export default function HomeScreen() {
   const [workHr, setWorkHr] = useState(0);
   const [workMin, setWorkMin] = useState(0);
 
+  const taskDurationSum = tasks.reduce((sum, task) => sum + task.estimated_time, 0);
+
   function handleHour(hour) {
     if (workHr != hour) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
@@ -80,7 +82,12 @@ export default function HomeScreen() {
       <Spacer />
       <XStack px="$8" width="100%" justify="space-between" alignItems="center">
         <Paragraph fontWeight="bold">{tasks.length} Tasks Total</Paragraph>
-        <Paragraph fontWeight="bold">{tasks.reduce((sum, task) => sum + task.estimated_time, 0)} min est.</Paragraph>
+        <Paragraph fontWeight="bold">
+          {(taskDurationSum >= 60) ? Math.floor(taskDurationSum / 60).toString() + " hr" : ""}
+          {" "}
+          {taskDurationSum % 60 != 0 ? taskDurationSum % 60 + " min" : ""}
+          {taskDurationSum == 0 ? "0 min" : ""}
+        </Paragraph>
       </XStack>
       <Spacer />
       <XStack px="$5">
