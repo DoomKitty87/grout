@@ -8,6 +8,7 @@ export default function SettingsScreen() {
   const [defaultEstimate, setDefaultEstimate] = useState(30);
   const [organizeBy, setOrganizeBy] = useState('smallest');
   const [addBy, setAddBy] = useState('continue');
+  const [timeEstimator, setTimeEstimator] = useState('local');
   useEffect(() => {
     async function fetchSettings() {
       const estimate = await AsyncStorage.getItem('defaultEstimate');
@@ -21,6 +22,10 @@ export default function SettingsScreen() {
       const addBy = await AsyncStorage.getItem('addBy');
       if (addBy) {
         setAddBy(addBy);
+      }
+      const timeEstimator = await AsyncStorage.getItem('timeEstimator');
+      if (timeEstimator) {
+        setTimeEstimator(timeEstimator);
       }
     }
     fetchSettings();
@@ -55,11 +60,20 @@ export default function SettingsScreen() {
             <Label>Largest</Label>
           </ToggleGroup.Item>
         </ToggleGroup>
+        <ToggleGroup value={timeEstimator} type="single" onValueChange={value => setTimeEstimator(value)}>
+          <ToggleGroup.Item value="local">
+            <Label>Local (Faster, Less Accurate)</Label>
+          </ToggleGroup.Item>
+          <ToggleGroup.Item value="api">
+            <Label>API (Slower, More Accurate)</Label>
+          </ToggleGroup.Item>
+        </ToggleGroup>
         <Button onPress={async () => {
           Keyboard.dismiss();
           await AsyncStorage.setItem('defaultEstimate', defaultEstimate.toString());
           await AsyncStorage.setItem('organizeBy', organizeBy);
           await AsyncStorage.setItem('addBy', addBy);
+          await AsyncStorage.setItem('timeEstimator', timeEstimator);
         }}>Save</Button>
         <Button onPress={async () => {
           Keyboard.dismiss();
@@ -69,6 +83,7 @@ export default function SettingsScreen() {
           await AsyncStorage.removeItem('defaultEstimate');
           await AsyncStorage.removeItem('organizeBy');
           await AsyncStorage.removeItem('addBy');
+          await AsyncStorage.removeItem('timeEstimator');
         }}>Reset to Defaults</Button>
         <Button onPress={async () => {
           Keyboard.dismiss();

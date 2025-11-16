@@ -14,6 +14,7 @@ import Reanimated, {
 import bm25 from "wink-bm25-text-search";
 import nlp from "wink-nlp-utils";
 import WordPOS from "wordpos";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Task {
   id: number;
@@ -201,7 +202,7 @@ async function expandSynonyms(text: string, wordpos: WordPOS): Promise<string> {
 async function estimateTimesBM25(db: SQLiteDatabase, tasks: Task[]): Promise<number[]> {
   // Use BM25 engine to estimate task times
   const ESTIMATION_SAMPLES = 5;
-  const DEFAULT_ESTIMATE = 30; // in minutes
+  const DEFAULT_ESTIMATE = await AsyncStorage.getItem('defaultEstimate').then(val => val ? parseInt(val) : 30)
 
   const completedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 1;`)
 
@@ -311,7 +312,7 @@ async function estimateTimesEmbeddings(db: SQLiteDatabase, tasks: Task[]): Promi
   // Use embeddings stored in db to estimate task times
   const completedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 1;`)
 
-  const DEFAULT_ESTIMATE = 30; // in minutes
+  const DEFAULT_ESTIMATE = await AsyncStorage.getItem('defaultEstimate').then(val => val ? parseInt(val) : 30)
   const ESTIMATION_SAMPLES = 5;
   let totalTime = 0;
   let totalSimilarity = 0;
@@ -382,7 +383,8 @@ async function fillEmbeddings(db: SQLiteDatabase): Promise<void> {
 async function estimateTaskTime(db: SQLiteDatabase): Promise<[Task[], number[]]> {
   const uncompletedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 0;`)
 
-  const useEmbeddings = false
+  const timeEstimator = await AsyncStorage.getItem('timeEstimator') || 'local';
+  const useEmbeddings = timeEstimator === 'api';
 
   if (useEmbeddings) {
     await fillEmbeddings(db)
