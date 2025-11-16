@@ -1,4 +1,4 @@
-import { Check, ExternalLink, Plus, Trash, Play } from '@tamagui/lucide-icons'
+import { Check, ExternalLink, Plus, Trash, Play, AlarmClockOff, AlarmClockPlus, Timer } from '@tamagui/lucide-icons'
 import { Image, Square, H1, H3, Separator, Checkbox, Text, Spacer, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { useState, useCallback } from 'react'
@@ -88,15 +88,16 @@ export default function HomeScreen() {
         bg="$color5" 
         borderWidth={1} 
         borderColor="$borderColor" 
-        icon={Play} 
+        icon={(workHr * 60 + workMin) < 5 ? Timer : Play} 
         size="$5" 
         grow={1}
+        disabled={(workHr * 60 + workMin) < 5}
         onPress={() => {
           router.push({ pathname: 'work', params: { time: (workHr * 60) + workMin }})
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           }
         }>
-          Start Work Session
+          {(workHr * 60 + workMin) < 5 ? "Select Session Length" : "Start Work Session"}
         </Button>
       </XStack>
       <Spacer />
@@ -198,14 +199,14 @@ function WorkTimer({ setHour, setMin }) {
             onScroll={(e) => {
               const contentOffsetY = e.nativeEvent.contentOffset.y;
               const itemHeight = numSize; // Approximate height of each H2 item
-              const selectedMin = clamp(Math.round(contentOffsetY / itemHeight) * 5 + 5, 5, 55);
+              const selectedMin = clamp(Math.round(contentOffsetY / itemHeight) * 5, 0, 55);
               setMin(selectedMin);
             }}
           >
           {
             Array.from(
-              { length: 11 }, 
-              (_, i) => String((i + 1) * 5).padStart(2, '0')
+              { length: 12 }, 
+              (_, i) => String((i) * 5).padStart(2, '0')
             ).map((t) => (
               <YStack key={t} height={numSize} justify="center" items="center">
                 <H2 fontWeight={400}>{t}</H2>
