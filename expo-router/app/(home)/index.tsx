@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import bm25 from "wink-bm25-text-search";
 import nlp from "wink-nlp-utils";
 import WordPOS from "wordpos";
-import OpenAI from 'openai';
+import { Blob } from 'expo-blob';
 
 interface Task {
   id: number;
@@ -284,19 +284,23 @@ async function estimateTimesEmbeddings(db: SQLiteDatabase, tasks: Task[]): Promi
 async function fillEmbeddings(db: SQLiteDatabase): Promise<void> {
   // Fill in missing embeddings for tasks
   const tasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE embedding IS NULL OR embedding = '';`)
+  console.log(process.env.EXPO_PUBLIC_OPENROUTER_API_KEY);
+  const response = await fetch("https://openrouter.ai/api/v1/embeddings", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.EXPO_PUBLIC_OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      "model": "google/gemini-embedding-001",
+      "input": tasks.map(t => t.title),
+      "encoding_format": "float"
+    })  
+  });
 
-  const openai = new OpenAI({
-    baseURL: 'https://openrouter.ai/api/v1',
-    apiKey: process.env.OPENROUTER_API_KEY,
-  })
+  const embeddings = await response.json();
 
-  const embeddings = await openai.embeddings.create({
-    model: 'google/gemini-embedding-001',
-    input: tasks.map(t => t.title),
-    encoding_format: 'float',
-  })
-
-  console.log('Fetched embeddings from OpenAI:', embeddings);
+  console.log('Fetched embeddings from OpenRouter:', embeddings);
 
   for (let i = 0; i < tasks.length; i++) {
     const task = tasks[i];
@@ -304,7 +308,7 @@ async function fillEmbeddings(db: SQLiteDatabase): Promise<void> {
     console.log(`Storing embedding for task "${task.title}":`, embedding);
     await db.execAsync(`
       UPDATE tasks
-      SET embedding = ${embedding}
+      SET embedding = ${new Blob(embedding)}
       WHERE id = ${task.id};
     `);
   }
@@ -313,7 +317,7 @@ async function fillEmbeddings(db: SQLiteDatabase): Promise<void> {
 async function estimateTaskTime(db: SQLiteDatabase): Promise<[Task[], number[]]> {
   const uncompletedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 0;`)
 
-  const useEmbeddings = false
+  const useEmbeddings = true
 
   if (useEmbeddings) {
     await fillEmbeddings(db)
