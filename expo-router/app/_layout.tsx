@@ -26,6 +26,7 @@ export default function RootLayout() {
   const [interLoaded, interError] = useFonts({
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
+    InterItalic: require('@tamagui/font-inter/otf/Inter-MediumItalic.otf'),
   })
 
   const db = SQLite.openDatabaseSync('tasks.db')
@@ -91,10 +92,12 @@ function RootLayoutNav() {
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: theme.red10.val,
+          tabBarActiveTintColor: theme.color12.val,
           tabBarStyle: {
             backgroundColor: theme.background.val,
             borderTopColor: theme.borderColor.val,
+            paddingTop: 8,
+            borderTopWidth: 1,
           },
           headerStyle: {
             backgroundColor: theme.background.val,
