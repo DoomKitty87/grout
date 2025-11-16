@@ -61,7 +61,9 @@ export default function HomeScreen() {
       <XStack marginTop={-40} marginBottom={30} borderWidth={1} borderColor="$borderColor">{[...Array(24).keys()].map((hour) => (
           <H5 marginTop={-5} fontWeight={200} marginBottom={-5} key={hour} color="$color10" transform="skewX(-25deg)">Grout </H5>
       ))}</XStack>
+      <Spacer />
       <WorkTimer setHour={setWorkHr} setMin={setWorkMin}/>
+      <Spacer />
       <Spacer />
       <Spacer />
       <XStack px="$8" width="100%" justify="space-between" alignItems="center">
@@ -134,55 +136,61 @@ function WorkTimer({ setHour, setMin }) {
 
   return (
     <XStack height={numSize} width="100%" justify="center" items="center" gap="$5">
-      <YStack borderRadius="$5" borderColor="$borderColor" borderWidth={1} height="100%" width={numSize}>
-        <ScrollView 
-          snapToInterval={numSize} 
-          gap={0} 
-          snapToAlignment="center" 
-          decelerationRate="fast" 
-          showsVerticalScrollIndicator={false}
-          onScroll={(e) => {
-            const contentOffsetY = e.nativeEvent.contentOffset.y;
-            const itemHeight = numSize; // Approximate height of each H2 item
-            const selectedHour = clamp(Math.round(contentOffsetY / itemHeight), 0, 23);
-            setHour(selectedHour);
-          }}
-        >
-        {
-          Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((t) => (
-            <YStack key={t} height={numSize} justify="center" items="center">
-              <H2 fontWeight={400}>{t}</H2>
-            </YStack>
-          ))
-        }
-        </ScrollView>
+      <YStack height="100%">
+        <YStack borderRadius="$5" borderColor="$borderColor" borderWidth={1} width={numSize}>
+          <ScrollView 
+            snapToInterval={numSize} 
+            gap={0} 
+            snapToAlignment="center" 
+            decelerationRate="fast" 
+            showsVerticalScrollIndicator={false}
+            onScroll={(e) => {
+              const contentOffsetY = e.nativeEvent.contentOffset.y;
+              const itemHeight = numSize; // Approximate height of each H2 item
+              const selectedHour = clamp(Math.round(contentOffsetY / itemHeight), 0, 23);
+              setHour(selectedHour);
+            }}
+          >
+          {
+            Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((t) => (
+              <YStack key={t} height={numSize} justify="center" items="center">
+                <H2 fontWeight={400}>{t}</H2>
+              </YStack>
+            ))
+          }
+          </ScrollView>
+        </YStack>
+        <Text pt="$2" text="center">Hour</Text>
       </YStack>
       <H2 t={-3} fontWeight={400}>:</H2>
-      <YStack borderRadius="$5" borderColor="$borderColor" borderWidth={1} height="100%" width={numSize}>
-        <ScrollView 
-          snapToInterval={numSize} 
-          gap={0} 
-          snapToAlignment="center" 
-          decelerationRate="fast" 
-          showsVerticalScrollIndicator={false}
-          onScroll={(e) => {
-            const contentOffsetY = e.nativeEvent.contentOffset.y;
-            const itemHeight = numSize; // Approximate height of each H2 item
-            const selectedMin = clamp(Math.round(contentOffsetY / itemHeight) * 5, 0, 55);
-            setMin(selectedMin);
-          }}
-        >
-        {
-          Array.from(
-            { length: 12 }, 
-            (_, i) => String(i * 5).padStart(2, '0')
-          ).map((t) => (
-            <YStack key={t} height={numSize} justify="center" items="center">
-              <H2 fontWeight={400}>{t}</H2>
-            </YStack>
-          ))
-        }
-        </ScrollView>
+      <YStack height="100%">
+        <YStack borderRadius="$5" borderColor="$borderColor" borderWidth={1} width={numSize}>
+          <ScrollView 
+            snapToInterval={numSize} 
+            gap={0} 
+            snapToAlignment="center" 
+            decelerationRate="fast" 
+            showsVerticalScrollIndicator={false}
+            onScroll={(e) => {
+              const contentOffsetY = e.nativeEvent.contentOffset.y;
+              const itemHeight = numSize; // Approximate height of each H2 item
+              const selectedMin = clamp(Math.round(contentOffsetY / itemHeight) * 5, 0, 55);
+              setMin(selectedMin);
+            }}
+          >
+          {
+            Array.from(
+              { length: 12 }, 
+              (_, i) => String(i * 5).padStart(2, '0')
+            ).map((t) => (
+              <YStack key={t} height={numSize} justify="center" items="center">
+                <H2 fontWeight={400}>{t}</H2>
+              </YStack>
+            ))
+          }
+          </ScrollView>
+        </YStack>
+        <Text pt="$2" text="center">Min</Text>
       </YStack>
     </XStack>
   )

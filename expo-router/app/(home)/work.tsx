@@ -159,13 +159,9 @@ function TaskItem({task, onTaskComplete}) {
       px="$7"
       onPress={handleTaskComplete}
     >
-      <Checkbox>
-        <Checkbox.Indicator>
-          <Check />
-        </Checkbox.Indicator>
-      </Checkbox>
       <XStack width="100%" justify="space-between">
-        <Text>{task.title}</Text>
+        <Paragraph width="85%" fontSize="$4">{task.title}</Paragraph>
+        <Paragraph text="right" width="15%" fontSize="$2" color="$color10">~{Math.ceil(task.estimated_time)} min</Paragraph>
       </XStack>
     </Button>
   )
