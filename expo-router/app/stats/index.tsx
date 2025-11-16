@@ -42,7 +42,7 @@ export default function StatsScreen() {
   })
 
   return (
-    <YStack>
+    <YStack bg="$background">
       <H2>Statistics</H2>
       
       <H3>{tasksCompleted.toString()} Tasks Completed</H3>

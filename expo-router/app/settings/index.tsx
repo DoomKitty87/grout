@@ -1,4 +1,4 @@
-import { H2, YStack, ToggleGroup, Input, Label, Button } from 'tamagui'
+import { H2, YStack, ToggleGroup, Input, Label, Button, Paragraph, Spacer } from 'tamagui'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { Keyboard, TouchableWithoutFeedback } from 'react-native';
@@ -35,48 +35,48 @@ export default function SettingsScreen() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <YStack minH="100%">
-        <H2>Preferences</H2>
+      <YStack minH="100%" padding="$5" bg="$background">
         <Label>Default Task Time Estimate</Label>
         <Input value={defaultEstimate.toString()} inputMode="numeric" onChangeText={text => setDefaultEstimate(parseInt(text) || 0)}></Input>
         <Label>Organize Tasks By:</Label>
-        <ToggleGroup value={organizeBy} type="single" onValueChange={value => setOrganizeBy(value)}>
-          <ToggleGroup.Item value="largest">
-            <Label>Largest (Eat the Frog)</Label>
+        <ToggleGroup value={organizeBy} type="single" onValueChange={value => setOrganizeBy(value)} disableDeactivation={true}>
+          <ToggleGroup.Item value="largest" borderColor={organizeBy === 'largest' ? '$color12' : undefined}>
+            <Paragraph>Largest (Eat the Frog)</Paragraph>
           </ToggleGroup.Item>
-          <ToggleGroup.Item value="smallest">
-            <Label>Smallest (Start off Easy)</Label>
+          <ToggleGroup.Item value="smallest" borderColor={organizeBy === 'smallest' ? '$color12' : undefined}>
+            <Paragraph>Smallest (Start off Easy)</Paragraph>
           </ToggleGroup.Item>
         </ToggleGroup>
         <Label>Add Additional Tasks By:</Label>
-        <ToggleGroup value={addBy} type="single" onValueChange={value => setAddBy(value)}>
-          <ToggleGroup.Item value="continue">
-            <Label>Continue Main Pattern</Label>
+        <ToggleGroup value={addBy} type="single" onValueChange={value => setAddBy(value)} disableDeactivation={true}>
+          <ToggleGroup.Item value="continue" borderColor={addBy === 'continue' ? '$color12' : undefined}>
+            <Paragraph>Continue Main Pattern</Paragraph>
           </ToggleGroup.Item>
-          <ToggleGroup.Item value="smallest">
-            <Label>Smallest</Label>
+          <ToggleGroup.Item value="smallest" borderColor={addBy === 'smallest' ? '$color12' : undefined}>
+            <Paragraph>Smallest</Paragraph>
           </ToggleGroup.Item>
-          <ToggleGroup.Item value="largest">
-            <Label>Largest</Label>
+          <ToggleGroup.Item value="largest" borderColor={addBy === 'largest' ? '$color12' : undefined}>
+            <Paragraph>Largest</Paragraph>
           </ToggleGroup.Item>
         </ToggleGroup>
         <Label>Time Estimation Method:</Label>
-        <ToggleGroup value={timeEstimator} type="single" onValueChange={value => setTimeEstimator(value)}>
-          <ToggleGroup.Item value="local">
-            <Label>Local (Faster, Less Accurate)</Label>
+        <ToggleGroup value={timeEstimator} type="single" onValueChange={value => setTimeEstimator(value)} orientation='vertical' disableDeactivation={true}>
+          <ToggleGroup.Item value="local" borderColor={timeEstimator === 'local' ? '$color12' : undefined}>
+            <Paragraph>Local (Faster, Less Accurate)</Paragraph>
           </ToggleGroup.Item>
-          <ToggleGroup.Item value="api">
-            <Label>API (Slower, More Accurate)</Label>
+          <ToggleGroup.Item value="api" borderColor={timeEstimator === 'api' ? '$color12' : undefined}>
+            <Paragraph>API (Slower, More Accurate)</Paragraph>
           </ToggleGroup.Item>
         </ToggleGroup>
-        <Button onPress={async () => {
+        <Spacer />
+        <Button bg="$color5" borderWidth={1} borderColor="$borderColor" marginBottom="$2" onPress={async () => {
           Keyboard.dismiss();
           await AsyncStorage.setItem('defaultEstimate', defaultEstimate.toString());
           await AsyncStorage.setItem('organizeBy', organizeBy);
           await AsyncStorage.setItem('addBy', addBy);
           await AsyncStorage.setItem('timeEstimator', timeEstimator);
         }}>Save</Button>
-        <Button onPress={async () => {
+        <Button bg="$color5" borderWidth={1} borderColor="$borderColor" marginBottom="$2" onPress={async () => {
           Keyboard.dismiss();
           setDefaultEstimate(30);
           setOrganizeBy('smallest');
@@ -86,13 +86,13 @@ export default function SettingsScreen() {
           await AsyncStorage.removeItem('addBy');
           await AsyncStorage.removeItem('timeEstimator');
         }}>Reset to Defaults</Button>
-        <Button onPress={async () => {
+        <Button bg="$color5" borderWidth={1} borderColor="$borderColor" marginBottom="$2" onPress={async () => {
           Keyboard.dismiss();
           db.execSync(`DELETE FROM tasks;`);
         }}>
           Clear All Tasks & History
         </Button>
-        <Button onPress={async () => {
+        <Button bg="$color5" borderWidth={1} borderColor="$borderColor" onPress={async () => {
           db.execSync(`DELETE FROM tasks;`);
           const demoTasksFinished = [
             { title: 'Chem quiz', time_spent: 10 },
