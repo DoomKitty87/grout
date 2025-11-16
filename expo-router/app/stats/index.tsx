@@ -7,40 +7,40 @@ export default function StatsScreen() {
   const db = useSQLiteContext()
   const [tasksCompleted, setTasksCompleted] = useState(0);
   const [timeSpent, setTimeSpent] = useState(0);
+  const [maxCount, setMaxCount] = useState(0);
+  const [counts, setCounts] = useState<number[]>([]);
+  const [dayTaskCounts, setDayTaskCounts] = useState<number[]>([]);
 
   useFocusEffect(useCallback(() => {
-    async function fetchCompletedCount() {
+    async function fetchTaskStats() {
       const completedCount = await db.getFirstAsync<number>(`SELECT COUNT(*) as count FROM tasks WHERE completed = 1;`);
       setTasksCompleted(completedCount!['count'] || 0);
-    }
-    fetchCompletedCount();
-  }, []));
 
-  useFocusEffect(useCallback(() => {
-    async function fetchTimeSpent() {
       const totalTime = await db.getFirstAsync<number>(`SELECT SUM(time_spent) as total FROM tasks WHERE completed = 1;`);
       setTimeSpent(totalTime!['total'] || 0);
+
+      let maxCount = 0;
+      const counts = [...Array(10).keys()].map((t) => {
+        const lowerBound = t * 10;
+        const upperBound = (t + 1) * 10;
+        const countInRange = db.getFirstSync<number>(`SELECT COUNT(*) as count FROM tasks WHERE completed = 1 AND time_spent >= ${lowerBound} AND time_spent < ${upperBound};`)!['count'] || 0;
+        if (countInRange > maxCount) {
+          maxCount = countInRange;
+        }
+        return countInRange;
+      })
+      setMaxCount(maxCount);
+      setCounts(counts);
+
+      const dayCounts = Array.from({ length: 112 }).map((_, index) => {
+        const dateStr = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - index).toISOString().split('T')[0];
+        const tasksCompletedOnDay = db.getFirstSync<number>(`SELECT COUNT(*) as count FROM tasks WHERE completed = 1 AND DATE(completed_at) = DATE('${dateStr}');`)!['count'] || 0;
+        return tasksCompletedOnDay;
+      });
+      setDayTaskCounts(dayCounts);
     }
-    fetchTimeSpent();
-  }, []));
-
-  const monthStartDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay();
-  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-
-  const columns = Math.ceil((daysInMonth + monthStartDay) / 7);
-  console.log(timeSpent);
-  console.log(tasksCompleted);
-
-  let maxCount = 0;
-  const counts = [...Array(10).keys()].map((t) => {
-    const lowerBound = t * 10;
-    const upperBound = (t + 1) * 10;
-    const countInRange = db.getFirstSync<number>(`SELECT COUNT(*) as count FROM tasks WHERE completed = 1 AND time_spent >= ${lowerBound} AND time_spent < ${upperBound};`)!['count'] || 0;
-    if (countInRange > maxCount) {
-      maxCount = countInRange;
-    }
-    return countInRange;
-  })
+    fetchTaskStats();
+  }, []))
 
   return (
     <ScrollView backgroundColor="$color1">
@@ -73,14 +73,9 @@ export default function StatsScreen() {
               Array.from({ length: 16 }).map((_, columnIndex) => (
                 <YStack key={columnIndex} flexDirection="column" gap="$1">
                   {
-                    Array.from({ length: 7 }).map((_, colIndex) => {
-                      const dayOfMonth = columnIndex * 7 + colIndex - monthStartDay + 1;
-                      if (dayOfMonth < 0 || dayOfMonth >= daysInMonth) {
-                        return <XStack key={colIndex} width={20} height={20} borderWidth={1} borderColor="$color3" borderRadius="$2" backgroundColor="$color2"/>;
-                      }
-                      // Fetch number of tasks completed on this day
-                      const dateStr = new Date(new Date().getFullYear(), new Date().getMonth(), dayOfMonth).toISOString().split('T')[0];
-                      const tasksCompletedOnDay = db.getFirstSync<number>(`SELECT COUNT(*) as count FROM tasks WHERE completed = 1 AND DATE(completed_at) = DATE('${dateStr}');`)!['count'] || 0;
+                    Array.from({ length: 7 }).map((_, rowIndex) => {
+                      const daysAgo = rowIndex + (15 - columnIndex) * 7;                      
+                      const tasksCompletedOnDay = dayTaskCounts[daysAgo] || 0;
                       let bgColor = '$color2';
                       if (tasksCompletedOnDay >= 5) {
                         bgColor = '#8ce99a';
@@ -89,7 +84,7 @@ export default function StatsScreen() {
                       } else if (tasksCompletedOnDay >= 1) {
                         bgColor = '#216e39';
                       }
-                      return <YStack key={colIndex} width={20} height={20} borderWidth={1} borderColor="$color3" borderRadius="$2" backgroundColor={bgColor} />;;
+                      return <YStack key={rowIndex} width={20} height={20} borderWidth={1} borderColor="$color3" borderRadius="$2" backgroundColor={bgColor}/>;
                     })
                   }
                 </YStack>
@@ -102,7 +97,7 @@ export default function StatsScreen() {
           <Separator />
           <YStack width="100%" gap="$2" pt="$2">
               {
-                [...Array(28).keys()].map((t, i) => {
+                [...Array(10).keys()].map((t, i) => {
                   const lowerBound = t * 10;
                   const upperBound = (t + 1) * 10;
                   return (
@@ -112,7 +107,7 @@ export default function StatsScreen() {
                           {upperBound} min
                         </Text>
                       </YStack>
-                      <XStack height="100%" width={counts[i] * 100 / maxCount + 10} borderRadius="$1" backgroundColor="#beb" justifyContent="flex-end"/>
+                      <XStack height="100%" width={counts[i] * 200 / maxCount + 10} borderRadius="$1" backgroundColor="rgba(73, 123, 73, 1)" justifyContent="flex-end"/>
                       <Separator />
                       <YStack width="$2">
                         <Text fontVariant="tabular-nums" fontSize="$1" color="$color11" text="left">
