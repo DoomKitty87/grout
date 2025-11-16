@@ -78,7 +78,6 @@ export default function WorkScreen() {
           setLastFinishedTime(now);
         }
         router.back()
-        router.back()
       }}>End Session</Button>
     </YStack>
   )
