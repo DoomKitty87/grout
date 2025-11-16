@@ -240,7 +240,7 @@ function DeleteAction(prog: SharedValue<number>, drag: SharedValue<number>) {
       alignItems: "left",
       paddingLeft: 20,
       width: 800,
-      height: (1 - prog.value) * 50,
+      // height: (1 - prog.value) * 50,
     };
   });
 
@@ -260,7 +260,7 @@ function TaskItem({task, onDelete} : {task : Task, onDelete : Function}) {
   return (
     <Animated.View layout={LinearTransition} entering={SlideInDown} exiting={SlideOutLeft}>
     <ReanimatedSwipeable
-      onSwipeableOpen={handleDisappear}
+      onSwipeableWillOpen={handleDisappear}
       friction={2}
       enableTrackpadTwoFingerGesture
       rightThreshold={180}
