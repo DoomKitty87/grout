@@ -92,6 +92,47 @@ export default function SettingsScreen() {
         }}>
           Clear All Tasks & History
         </Button>
+        <Button onPress={async () => {
+          db.execSync(`DELETE FROM tasks;`);
+          const demoTasksFinished = [
+            { title: 'Write project proposal' },
+            { title: 'Design wireframes' },
+            { title: 'Develop landing page' },
+            { title: 'Set up database schema' },
+            { title: 'Implement authentication' },
+            { title: 'Create user dashboard' },
+            { title: 'Test application features' },
+            { title: 'Deploy to production' },
+          ];
+          for (const task of demoTasksFinished) {
+            // Random time spent between 30 and 120 minutes
+            const timeSpent = Math.floor(Math.random() * 30 + 15);
+            // Random date within the last 30 days
+            const daysAgo = Math.floor(Math.random() * 30);
+            
+            await db.prepareAsync(`
+              INSERT INTO tasks (title, time_spent, completed, completed_at)
+              VALUES (?, ?, 1, datetime('now', ? || ' days'));
+            `).then(statement => statement.executeAsync([task.title, timeSpent, `-${daysAgo}`]).then(() => statement.finalizeAsync()));
+          }
+
+          const demoTasksUnfinished = [
+            { title: 'Optimize performance' },
+            { title: 'Fix bugs from testing' },
+            { title: 'Update documentation' },
+            { title: 'Plan marketing strategy' },
+            { title: 'Conduct user training' },
+          ];
+
+          for (const task of demoTasksUnfinished) {
+            await db.prepareAsync(`
+              INSERT INTO tasks (title)
+              VALUES (?);
+            `).then(statement => statement.executeAsync([task.title]).then(() => statement.finalizeAsync()));
+          }
+        }}>
+          Load Demo Tasks & History
+        </Button>
       </YStack>
     </TouchableWithoutFeedback>
   )
