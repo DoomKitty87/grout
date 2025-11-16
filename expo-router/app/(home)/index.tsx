@@ -212,7 +212,7 @@ function TaskItem({task, onDelete} : {task : Task, onDelete : Function}) {
       enableTrackpadTwoFingerGesture
       rightThreshold={180}
       renderRightActions={DeleteAction}>
-      <YStack backgroundColor="$color1" width="100%" borderRadius="0" justify="center" py="$3" px="$5" borderBottomColor="$color2" gap={0}>
+      <YStack backgroundColor="$color1" width="100%" borderRadius="0" justify="center" py="$3" px="$6" borderBottomColor="$color2" gap={0}>
         <XStack  key={task.id} width="100%" justify="space-between">
         <Text>{task.title}</Text>
         </XStack>
