@@ -68,11 +68,16 @@ export default function WorkScreen() {
     `);
     setLastFinishedTime(now);
     setTasks(tasks.filter(t => t.id !== task.id));
-    if (tasks.length === 0) {
+    console.log('Task completed:', task.title);
+    console.log('Tasks remaining:', tasks.length - 1);
+    if (tasks.length === 1) {
       if (additionalTasksBuffer.length > 0) {
         const nextTask = additionalTasksBuffer[0];
+        console.log('Next task from buffer:', nextTask.title);
         setTasks([nextTask]);
         setAdditionalTasksBuffer(additionalTasksBuffer.slice(1));
+      } else {
+        console.log('No more tasks to add.');
       }
     }
   }
@@ -208,6 +213,7 @@ async function pickTasksToDo(db: SQLiteDatabase, availableTime: number): Promise
   }
 
   const leftoverTasks = sortTaskList(tasks.filter(t => !toWorkOn.includes(t)), addByMethod === 'continue' ? organizeByMethod : '');
-
+  console.log('To work on:', toWorkOn);
+  console.log('Leftover tasks:', leftoverTasks);
   return [toWorkOn, leftoverTasks];
 }
