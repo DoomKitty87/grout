@@ -1,8 +1,16 @@
-import { Check, ExternalLink, Plus, Trash } from '@tamagui/lucide-icons'
-import { Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
+import { Check, ExternalLink, Plus, Trash, Play } from '@tamagui/lucide-icons'
+import { Square, H3, Separator, Checkbox, Text, Spacer, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'expo-router';
+import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
+import Reanimated, {
+  useSharedValue,
+  SharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 import bm25 from "wink-bm25-text-search";
 import nlp from "wink-nlp-utils";
 import WordPOS from "wordpos";
@@ -35,12 +43,24 @@ export default function HomeScreen() {
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [newTaskCategory, setNewTaskCategory] = useState('General')
 
-  return (
-    <YStack flex={1} items="center" gap="$8" px="$10" pt="$5" bg="$background">
-      <H2>home page</H2>
+  async function handleDelete(task) {
+    const statement = await db.prepareAsync(`
+      DELETE FROM tasks WHERE id = ?;
+    `);
+    await statement.executeAsync([task.id]);
+    await statement.finalizeAsync();
+    setTasks(tasks.filter(t => t.id !== task.id));
+  }
 
-      <XStack>
-        <Input placeholder='Task' value={newTaskTitle} onChangeText={setNewTaskTitle}></Input>
+  return (
+    <YStack flex={1} items="center" gap="$8" pt="$13" pb="$8" bg="$background">
+      <YStack px="$5" alignSelf="left">
+        <H3>Tasks</H3>
+        <Text>Total: 20</Text>
+        <Text>Time Estimated: 2:40</Text>
+      </YStack>
+      <XStack width="100%" px="$5" justify="space-between">
+        <Input width="80%" placeholder='Add Task' value={newTaskTitle} onChangeText={setNewTaskTitle}></Input>
         <Button onPress={async () => {
           const statement = await db.prepareAsync(`
             INSERT INTO tasks (title)
@@ -67,31 +87,60 @@ export default function HomeScreen() {
           <Plus />
         </Button>
       </XStack>
-
-      <H4>Database Preview:</H4>
-      <ScrollView>
-          <YStack gap={10}>
-          {tasks.map(task => (
-            <XStack key={task.id} width="100%" justify="space-between">
-              <H5>{task.title}</H5>
-              <Button ml="$4" onPress={async () => {
-                const statement = await db.prepareAsync(`
-                  DELETE FROM tasks WHERE id = ?;
-                `);
-                await statement.executeAsync([task.id]);
-                await statement.finalizeAsync();
-                setTasks(tasks.filter(t => t.id !== task.id));
-              }}>
-                <Trash />
-              </Button>
-            </XStack>
-          ))}
+      <ScrollView width="100%">
+          <YStack gap="$0">
+          {tasks.map(task => (<TaskItem key={task.id} task={task} onDelete={handleDelete}/>))}
           </YStack>
       </ScrollView>
-      <YStack>
-        <Button onPress={() => router.push('time')}>Start Work Session</Button>
-      </YStack>
+      <XStack px="$5">
+        <Button icon={Play} size="$5" grow={1} onPress={() => router.push('time')}>Start Work Session</Button>
+      </XStack>
     </YStack>
+  )
+}
+
+function DeleteAction(prog: SharedValue<number>, drag: SharedValue<number>) {
+  
+  const styleAnimation = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: drag.value + 800 }],
+      backgroundColor: "red",
+      justifyContent: "center",
+      alignItems: "left",
+      paddingLeft: 20,
+      width: 800,
+      height: (1 - prog.value) * 50,
+    };
+  });
+
+  return (
+    <Reanimated.View style={styleAnimation}>
+      <Trash themeInverse></Trash>
+    </Reanimated.View>
+  );
+}
+
+function TaskItem({task, onDelete} : {task : Task, onDelete : Function}) {
+
+  function handleDisappear() {
+    onDelete(task);
+  }
+  
+  return (
+    <>
+    <ReanimatedSwipeable
+      onSwipeableOpen={handleDisappear}
+      friction={2}
+      enableTrackpadTwoFingerGesture
+      rightThreshold={180}
+      renderRightActions={DeleteAction}>
+      <YStack backgroundColor="$color1" width="100%" borderRadius="0" justify="center" py="$3" px="$5" borderBottomColor="$color2" gap={0}>
+        <XStack  key={task.id} width="100%" justify="space-between">
+        <Text>{task.title}</Text>
+        </XStack>
+      </YStack>
+    </ReanimatedSwipeable>
+    </>
   )
 }
 
