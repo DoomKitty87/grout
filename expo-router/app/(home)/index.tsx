@@ -1,4 +1,4 @@
-import { ExternalLink, Plus, Trash } from '@tamagui/lucide-icons'
+import { Check, ExternalLink, Plus, Trash } from '@tamagui/lucide-icons'
 import { Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { useState, useEffect } from 'react'
@@ -40,9 +40,10 @@ export default function HomeScreen() {
           <Select.Trigger maxWidth={100} maxHeight={40}>
             <Select.Value placeholder="Category" />
           </Select.Trigger>
+          
           <Select.Content zIndex={20000}>
             <Select.Viewport>
-              <Select.Group>
+              <Select.Group maxWidth={100} left={-100}>
                 <Select.Item value="General" index={0}>
                   <Select.ItemText>General</Select.ItemText>
                 </Select.Item>
