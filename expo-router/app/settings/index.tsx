@@ -95,33 +95,31 @@ export default function SettingsScreen() {
         <Button onPress={async () => {
           db.execSync(`DELETE FROM tasks;`);
           const demoTasksFinished = [
-            { title: 'Write project proposal' },
-            { title: 'Design wireframes' },
-            { title: 'Develop landing page' },
-            { title: 'Set up database schema' },
-            { title: 'Implement authentication' },
-            { title: 'Create user dashboard' },
-            { title: 'Test application features' },
-            { title: 'Deploy to production' },
+            { title: 'Chem quiz', time_spent: 10 },
+            { title: 'Math homework', time_spent: 30 },
+            { title: 'Math hw reflection', time_spent: 5 },
+            { title: 'Canvas discussion post engr', time_spent: 20 },
+            { title: 'Education discussion post', time_spent: 40 },
+            { title: 'Comms speech outline', time_spent: 70 },
+            { title: 'Education essay', time_spent: 85 },
+            { title: 'Math quiz', time_spent: 12 },
           ];
           for (const task of demoTasksFinished) {
-            // Random time spent between 30 and 120 minutes
-            const timeSpent = Math.floor(Math.random() * 30 + 15);
             // Random date within the last 30 days
             const daysAgo = Math.floor(Math.random() * 30);
             
             await db.prepareAsync(`
               INSERT INTO tasks (title, time_spent, completed, completed_at)
               VALUES (?, ?, 1, datetime('now', ? || ' days'));
-            `).then(statement => statement.executeAsync([task.title, timeSpent, `-${daysAgo}`]).then(() => statement.finalizeAsync()));
+            `).then(statement => statement.executeAsync([task.title, task.time_spent, `-${daysAgo}`]).then(() => statement.finalizeAsync()));
           }
 
           const demoTasksUnfinished = [
-            { title: 'Optimize performance' },
-            { title: 'Fix bugs from testing' },
-            { title: 'Update documentation' },
-            { title: 'Plan marketing strategy' },
-            { title: 'Conduct user training' },
+            { title: 'Math assignment' },
+            { title: 'Chemistry quiz' },
+            { title: 'Education canvas discussion' },
+            { title: 'Communications speech' },
+            { title: 'Math homework reflection' },
           ];
 
           for (const task of demoTasksUnfinished) {
