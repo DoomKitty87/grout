@@ -116,7 +116,7 @@ export default function WorkScreen() {
       <Spacer />
       <Spacer />
       <ScrollView width="100%">
-        <YStack gap={0} pb="$10">
+        <YStack gap="$2">
           {tasks.map((task) => (
             <TaskItem key={task.id} task={task} onTaskComplete={handleTaskComplete}></TaskItem>
           ))}
@@ -169,14 +169,16 @@ function TaskItem({task, onTaskComplete}) {
   return (
     <Button 
       key={task.id} 
-      backgroundColor="$color1" 
-      borderRadius={0}
-      px="$7"
+      backgroundColor="$color2" 
+      borderColor="$borderColor" borderWidth={1} borderRadius="$5"
+      mx="$7"
+      height={task.estimated_time * 2 + 20}
+      py="$2"
       onPress={handleTaskComplete}
     >
-      <XStack width="100%" justify="space-between">
+      <XStack width="100%" justify="space-between"  height="100%">
         <Paragraph width="85%" fontSize="$4">{task.title}</Paragraph>
-        <Paragraph text="right" width="15%" fontSize="$2" color="$color10">~{Math.ceil(task.estimated_time)} min</Paragraph>
+        <Paragraph text="right" width="15%" fontSize="$2" color="$color10">{Math.ceil(task.estimated_time)} min</Paragraph>
       </XStack>
     </Button>
   )

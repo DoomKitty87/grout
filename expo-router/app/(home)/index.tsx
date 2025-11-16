@@ -265,7 +265,7 @@ function TaskItem({task, onDelete} : {task : Task, onDelete : Function}) {
       <YStack backgroundColor="$color1" width="100%" borderRadius="0" justify="center" py="$3" px="$5" borderColor="$borderColor" gap={0}>
         <XStack key={task.id} width="100%" justify="space-between">
           <Paragraph width="85%" fontSize="$4">{task.title}</Paragraph>
-          <Paragraph text="right" width="15%" fontSize="$2" color="$color10">~{Math.ceil(task.estimated_time)} min</Paragraph>
+          <Paragraph text="right" width="15%" fontSize="$2" color="$color10">{Math.ceil(task.estimated_time)} min</Paragraph>
         </XStack>
       </YStack>
     </ReanimatedSwipeable>
