@@ -42,6 +42,14 @@ export default function WorkScreen() {
       const [tasksToDo, additionalTasksBuffer] = await pickTasksToDo(db, availableTime)
       setTasks(tasksToDo);
       setAdditionalTasksBuffer(additionalTasksBuffer);
+
+      if (tasksToDo.length === 0) {
+        if (additionalTasksBuffer.length > 0) {
+          const nextTask = additionalTasksBuffer[0];
+          setTasks([nextTask]);
+          setAdditionalTasksBuffer(additionalTasksBuffer.slice(1));
+        }
+      }
     }
     fetchTasks();
     setSessionStart(Date.now());

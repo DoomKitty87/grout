@@ -1,4 +1,4 @@
-import { Check, ExternalLink, Plus, Trash, Play, AlarmClockOff, AlarmClockPlus, Timer } from '@tamagui/lucide-icons'
+import { Check, ExternalLink, Plus, Trash, Play, AlarmClockOff, AlarmClockPlus, Timer, ClipboardPlus } from '@tamagui/lucide-icons'
 import { Image, Square, H1, H3, Separator, Checkbox, Text, Spacer, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { useState, useCallback } from 'react'
@@ -95,16 +95,15 @@ export default function HomeScreen() {
         bg="$color5" 
         borderWidth={1} 
         borderColor="$borderColor" 
-        icon={(workHr * 60 + workMin) < 5 ? Timer : Play} 
+        icon={tasks.length > 0 ? ((workHr * 60 + workMin) < 5 ? Timer : Play) : ClipboardPlus}
         size="$5" 
         grow={1}
-        disabled={(workHr * 60 + workMin) < 5}
+        disabled={(workHr * 60 + workMin) < 5 || tasks.length == 0}
         onPress={() => {
           router.push({ pathname: 'work', params: { time: (workHr * 60) + workMin }})
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          }
-        }>
-          {(workHr * 60 + workMin) < 5 ? "Select Session Length" : "Start Work Session"}
+        }}>
+          {tasks.length > 0 ? ((workHr * 60 + workMin) < 5 ? "Select Session Length" : "Start Work Session") : "Add Tasks"}
         </Button>
       </XStack>
       <Spacer />
