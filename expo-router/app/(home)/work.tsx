@@ -1,5 +1,5 @@
 import { Check, StopCircle, Circle } from '@tamagui/lucide-icons'
-import { Spacer, Separator, Text, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, Checkbox } from 'tamagui'
+import { Spacer, Separator, Text, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, Checkbox, ZStack, getTokenValue } from 'tamagui'
 import { ToastControl } from 'components/CurrentToast'
 import { useSQLiteContext, SQLiteDatabase } from 'expo-sqlite'
 import { useState, useEffect, useMemo } from 'react'
@@ -12,6 +12,11 @@ import Reanimated, {
   useAnimatedStyle,
   withSpring,
   useAnimatedRef,
+  withDelay,
+  withTiming,
+  LinearTransition,
+  FadeIn,
+  SlideOutRight,
 } from 'react-native-reanimated'
 import Animated from 'react-native-reanimated'
 import * as Haptics from 'expo-haptics';
@@ -160,30 +165,43 @@ function Countdown({ startTime, availableTimeMin }: { startTime: number, availab
   );
 }
 
-function TaskItem({task, onTaskComplete}) { 
+function TaskItem({task, onTaskComplete}) {
+
+  const [complete, setComplete] = useState(false);
 
   function handleTaskComplete() {
-    onTaskComplete(task);
+    setComplete(true);
+    setTimeout(() => {
+      onTaskComplete(task);
+    }, 100);
   }
 
   return (
-    <Button 
-      key={task.id} 
-      backgroundColor="$color2" 
-      borderColor="$borderColor" borderWidth={1} borderRadius="$5"
-      mx="$5"
-      height={(task.estimated_time * 2) + 40}
-      py="$2"
-      onPress={handleTaskComplete}
-    >
-      <XStack width="100%" justify="space-between" height="100%" alignItems="flex-start">
-        <XStack gap="$2" alignItems="center" l={-2}>
-          <Circle size={16} />
-          <Paragraph fontSize="$4">{task.title}</Paragraph>
+    <YStack>
+    <Animated.View layout={LinearTransition} exiting={SlideOutRight}>
+      <Button 
+        key={task.id} 
+        backgroundColor="$color2" 
+        borderColor="$borderColor" borderWidth={1} borderRadius="$5"
+        height={(task.estimated_time * 2) + 40} 
+        mx="$5"
+        py="$2"
+        onPress={handleTaskComplete}
+      >
+        <XStack width="100%" justify="space-between" height="100%" alignItems="flex-start">
+          <XStack gap="$2" alignItems="center">
+            <Checkbox checked={complete}>
+              <Checkbox.Indicator>
+                <Check />
+              </Checkbox.Indicator>
+            </Checkbox>
+            <Paragraph fontSize="$4">{task.title}</Paragraph>
+          </XStack>
+          <Paragraph text="right" width="15%" fontSize="$2" color="$color10">{Math.ceil(task.estimated_time)} min</Paragraph>
         </XStack>
-        <Paragraph text="right" width="15%" fontSize="$2" color="$color10">{Math.ceil(task.estimated_time)} min</Paragraph>
-      </XStack>
-    </Button>
+      </Button>
+    </Animated.View>
+    </YStack>
   )
 }
 

@@ -11,6 +11,9 @@ import Reanimated, {
   useAnimatedStyle,
   withSpring,
   useAnimatedRef,
+  LinearTransition,
+  SlideOutLeft,
+  SlideInDown,
 } from 'react-native-reanimated'
 import bm25 from "wink-bm25-text-search";
 import nlp from "wink-nlp-utils";
@@ -255,7 +258,7 @@ function TaskItem({task, onDelete} : {task : Task, onDelete : Function}) {
   }
   
   return (
-    <>
+    <Animated.View layout={LinearTransition} entering={SlideInDown} exiting={SlideOutLeft}>
     <ReanimatedSwipeable
       onSwipeableOpen={handleDisappear}
       friction={2}
@@ -269,7 +272,7 @@ function TaskItem({task, onDelete} : {task : Task, onDelete : Function}) {
         </XStack>
       </YStack>
     </ReanimatedSwipeable>
-    </>
+    </Animated.View>
   )
 }
 
