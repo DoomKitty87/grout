@@ -1,5 +1,5 @@
 import { Check, ExternalLink, Plus, Trash, Play } from '@tamagui/lucide-icons'
-import { Square, H3, Separator, Checkbox, Text, Spacer, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
+import { Square, H1, H3, Separator, Checkbox, Text, Spacer, Anchor, H2, H4, Input, Label, Paragraph, Popover, XStack, YStack, Button, ScrollView, H5, Select } from 'tamagui'
 import { SQLiteDatabase, useSQLiteContext } from 'expo-sqlite'
 import { useState, useCallback } from 'react'
 import { useFocusEffect } from 'expo-router'
@@ -10,10 +10,12 @@ import Reanimated, {
   SharedValue,
   useAnimatedStyle,
   withSpring,
+  useAnimatedRef,
 } from 'react-native-reanimated'
 import bm25 from "wink-bm25-text-search";
 import nlp from "wink-nlp-utils";
 import WordPOS from "wordpos";
+import Animated from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Task {
@@ -42,6 +44,8 @@ export default function HomeScreen() {
 
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [newTaskCategory, setNewTaskCategory] = useState('General')
+  const [workHr, setWorkHr] = useState(0);
+  const [workMin, setWorkMin] = useState(0);
 
   async function handleDelete(task) {
     const statement = await db.prepareAsync(`
@@ -53,12 +57,22 @@ export default function HomeScreen() {
   }
 
   return (
-    <YStack flex={1} items="center" gap="$8" pt="$13" pb="$8" bg="$background">
-      <YStack px="$5" alignSelf="left">
-        <H3>Tasks</H3>
-        <Text>Total: 20</Text>
-        <Text>Time Estimated: 2:40</Text>
-      </YStack>
+    <YStack flex={1} items="center" gap={0} pt="$13" pb="$8" bg="$background">
+      <WorkTimer setHour={setWorkHr} setMin={setWorkMin}/>
+      <Spacer />
+      <Spacer />
+      <XStack px="$5">
+        <Button icon={Play} size="$5" grow={1} onPress={() => router.push({ pathname: 'work', params: { time: (workHr * 60) + workMin }})}>
+          Start Work Session
+        </Button>
+      </XStack>
+      <Spacer />
+      <Spacer />
+      <XStack px="$5">
+        <Separator alignSelf="stretch"/>
+      </XStack>
+      <Spacer />
+      <Spacer />
       <XStack width="100%" px="$5" justify="space-between">
         <Input width="80%" placeholder='Add Task' value={newTaskTitle} onChangeText={setNewTaskTitle}></Input>
         <Button onPress={async () => {
@@ -88,15 +102,78 @@ export default function HomeScreen() {
           <Plus />
         </Button>
       </XStack>
+      <Spacer />
       <ScrollView width="100%">
           <YStack gap="$0">
           {tasks.map(task => (<TaskItem key={task.id} task={task} onDelete={handleDelete}/>))}
           </YStack>
       </ScrollView>
-      <XStack px="$5">
-        <Button icon={Play} size="$5" grow={1} onPress={() => router.push('time')}>Start Work Session</Button>
-      </XStack>
+      
     </YStack>
+  )
+}
+
+function WorkTimer({ setHour, setMin }) {
+
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+
+  const numSize = 75;
+
+  return (
+    <XStack height={numSize} width="100%" justify="center" items="center" gap="$5">
+      <YStack borderRadius="$5" borderColor="$color3" borderWidth={1} outlineColor="$color3" height="100%" width={numSize}>
+        <ScrollView 
+          snapToInterval={numSize} 
+          gap={0} 
+          snapToAlignment="center" 
+          decelerationRate="fast" 
+          showsVerticalScrollIndicator={false}
+          onScroll={(e) => {
+            const contentOffsetY = e.nativeEvent.contentOffset.y;
+            const itemHeight = numSize; // Approximate height of each H2 item
+            const selectedHour = clamp(Math.round(contentOffsetY / itemHeight), 0, 23);
+            setHour(selectedHour);
+          }}
+        >
+        {
+          Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((t) => (
+            <YStack key={t} height={numSize} justify="center" items="center">
+              <H2>{t}</H2>
+            </YStack>
+          ))
+        }
+        </ScrollView>
+      </YStack>
+      <H2>:</H2>
+      <YStack borderRadius="$5" borderColor="$color3" borderWidth={1} outlineColor="$color3" height="100%" width={numSize}>
+        <ScrollView 
+          snapToInterval={numSize} 
+          gap={0} 
+          snapToAlignment="center" 
+          decelerationRate="fast" 
+          showsVerticalScrollIndicator={false}
+          onScroll={(e) => {
+            const contentOffsetY = e.nativeEvent.contentOffset.y;
+            const itemHeight = numSize; // Approximate height of each H2 item
+            const selectedMin = clamp(Math.round(contentOffsetY / itemHeight) * 5, 0, 55);
+            setMin(selectedMin);
+          }}
+        >
+        {
+          Array.from(
+            { length: 12 }, 
+            (_, i) => String(i * 5).padStart(2, '0')
+          ).map((t) => (
+            <YStack key={t} height={numSize} justify="center" items="center">
+              <H2>{t}</H2>
+            </YStack>
+          ))
+        }
+        </ScrollView>
+      </YStack>
+    </XStack>
   )
 }
 
