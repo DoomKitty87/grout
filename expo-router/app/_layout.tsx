@@ -7,7 +7,7 @@ import { SplashScreen, Tabs } from 'expo-router'
 import { Provider } from '../components/Provider'
 import { useTheme } from 'tamagui'
 import * as SQLite from 'expo-sqlite'
-import { Home, Settings } from '@tamagui/lucide-icons'
+import { Home, PieChart, Settings } from '@tamagui/lucide-icons'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -110,6 +110,13 @@ function RootLayoutNav() {
             title: 'Home',
             headerShown: false,
             tabBarIcon: ({ color }) => <Home color={color as any} />,
+          }}
+        />
+        <Tabs.Screen
+          name="stats/index"
+          options={{
+            title: 'Stats',
+            tabBarIcon: ({ color }) => <PieChart color={color as any} />,
           }}
         />
         <Tabs.Screen
