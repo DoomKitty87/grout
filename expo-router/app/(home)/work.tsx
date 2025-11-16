@@ -100,7 +100,7 @@ export default function WorkScreen() {
       </XStack>
       <Spacer />
       <Spacer />
-      <ScrollView>
+      <ScrollView width="100%">
         <YStack gap={0} pb="$10">
           {tasks.map((task) => (
             <TaskItem key={task.id} task={task} onTaskComplete={handleTaskComplete}></TaskItem>

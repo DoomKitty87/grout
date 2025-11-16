@@ -63,6 +63,11 @@ export default function HomeScreen() {
       <WorkTimer setHour={setWorkHr} setMin={setWorkMin}/>
       <Spacer />
       <Spacer />
+      <XStack px="$8" width="100%" justify="space-between" alignItems="center">
+        <Paragraph fontWeight="bold">{tasks.length} Tasks Total</Paragraph>
+        <Paragraph fontWeight="bold">{tasks.reduce((sum, task) => sum + task.estimated_time, 0)} min est.</Paragraph>
+      </XStack>
+      <Spacer />
       <XStack px="$5">
         <Button bg="$color5" borderWidth={1} borderColor="$borderColor" icon={Play} size="$5" grow={1} onPress={() => router.push({ pathname: 'work', params: { time: (workHr * 60) + workMin }})}>
           Start Work Session
@@ -74,10 +79,6 @@ export default function HomeScreen() {
         <Separator alignSelf="stretch"/>
       </XStack>
       <Spacer />
-      <XStack px="$5" width="100%" justify="space-between" alignItems="center">
-        <Paragraph>{tasks.length} Tasks</Paragraph>
-        <Paragraph>{tasks.reduce((sum, task) => sum + task.estimated_time, 0)} min</Paragraph>
-      </XStack>
       <Spacer />
       <XStack width="100%" px="$5" justify="space-between">
         <Input width="80%" placeholder='Add Task' borderColor="$borderColor" value={newTaskTitle} onChangeText={setNewTaskTitle}></Input>
@@ -218,10 +219,10 @@ function TaskItem({task, onDelete} : {task : Task, onDelete : Function}) {
       enableTrackpadTwoFingerGesture
       rightThreshold={180}
       renderRightActions={DeleteAction}>
-      <YStack backgroundColor="$color1" width="100%" borderRadius="0" justify="center" py="$3" px="$5" borderBottomWidth={1} borderColor="$borderColor" gap={0}>
-        <XStack  key={task.id} width="100%" justify="space-between">
-          <Paragraph fontSize="$4">{task.title}</Paragraph>
-          <Paragraph fontSize="$2" color="$color10">{Math.ceil(task.estimated_time)} min</Paragraph>
+      <YStack backgroundColor="$color1" width="100%" borderRadius="0" justify="center" py="$3" px="$5" borderColor="$borderColor" gap={0}>
+        <XStack key={task.id} width="100%" justify="space-between">
+          <Paragraph width="85%" fontSize="$4">{task.title}</Paragraph>
+          <Paragraph text="right" width="15%" fontSize="$2" color="$color10">~{Math.ceil(task.estimated_time)} min</Paragraph>
         </XStack>
       </YStack>
     </ReanimatedSwipeable>
