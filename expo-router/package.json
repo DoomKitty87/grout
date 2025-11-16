@@ -29,6 +29,7 @@
     "expo-blob": "^0.1.6",
     "expo-build-properties": "~1.0.9",
     "expo-font": "~14.0.9",
+    "expo-haptics": "~15.0.7",
     "expo-linking": "~8.0.8",
     "expo-router": "~6.0.14",
     "expo-splash-screen": "~31.0.10",

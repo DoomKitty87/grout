@@ -14,6 +14,7 @@ import Reanimated, {
   useAnimatedRef,
 } from 'react-native-reanimated'
 import Animated from 'react-native-reanimated'
+import * as Haptics from 'expo-haptics';
 
 interface Task {
   id: number;
@@ -88,6 +89,7 @@ export default function WorkScreen() {
             `);
             setLastFinishedTime(now);
           }
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
           router.back()
         }}>
           End Session

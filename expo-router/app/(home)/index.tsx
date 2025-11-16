@@ -18,6 +18,7 @@ import WordPOS from "wordpos";
 import Animated from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Keyboard } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
 interface Task {
   id: number;
@@ -47,6 +48,20 @@ export default function HomeScreen() {
   const [workHr, setWorkHr] = useState(0);
   const [workMin, setWorkMin] = useState(0);
 
+  function handleHour(hour) {
+    if (workHr != hour) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+    }
+    setWorkHr(hour);
+  }
+
+  function handleMin(min) {
+    if (workMin != min) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+    }
+    setWorkMin(min);
+  }
+
   async function handleDelete(task) {
     const statement = await db.prepareAsync(`
       DELETE FROM tasks WHERE id = ?;
@@ -59,7 +74,7 @@ export default function HomeScreen() {
   return (
     <YStack flex={1} items="center" gap={0} pt="$11" bg="$background">
       <Spacer />
-      <WorkTimer setHour={setWorkHr} setMin={setWorkMin}/>
+      <WorkTimer setHour={handleHour} setMin={handleMin}/>
       <Spacer />
       <Spacer />
       <Spacer />
@@ -69,7 +84,18 @@ export default function HomeScreen() {
       </XStack>
       <Spacer />
       <XStack px="$5">
-        <Button bg="$color5" borderWidth={1} borderColor="$borderColor" icon={Play} size="$5" grow={1} onPress={() => router.push({ pathname: 'work', params: { time: (workHr * 60) + workMin }})}>
+        <Button 
+        bg="$color5" 
+        borderWidth={1} 
+        borderColor="$borderColor" 
+        icon={Play} 
+        size="$5" 
+        grow={1} 
+        onPress={() => {
+          router.push({ pathname: 'work', params: { time: (workHr * 60) + workMin }})
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
+        }>
           Start Work Session
         </Button>
       </XStack>
