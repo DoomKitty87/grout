@@ -67,7 +67,6 @@ export default function WorkScreen() {
         setAdditionalTasksBuffer(additionalTasksBuffer.slice(1));
       }
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }
 
   return (
@@ -140,10 +139,10 @@ function Countdown({ startTime, availableTimeMin }: { startTime: number, availab
   }, [endTime]);
 
   return (
-    <XStack height={numSize} width="100%" justify="center" items="center">
-      <H2 fontVariant="tabular-nums">
-        {hours.toString().padStart(2, "0")} : {minutes.toString().padStart(2, "0")} : {seconds.toString().padStart(2, "0")}
-      </H2>
+    <XStack height={numSize} justify="center" items="center" borderColor="$borderColor" borderWidth={1} borderRadius="$5" px="$5">
+      <H2 fontVariant="tabular-nums">{hours.toString().padStart(2, "0")}</H2>
+      <H2 t={-3}> : </H2><H2 fontVariant="tabular-nums">{minutes.toString().padStart(2, "0")}</H2>
+      <H2 t={-3}> : </H2><H2 fontVariant="tabular-nums">{seconds.toString().padStart(2, "0")}</H2>
     </XStack>
   );
 }
