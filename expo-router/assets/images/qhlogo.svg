@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (ebf0e94, 2025-05-08)"
+   sodipodi:docname="qhlogo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="1.5426529"
+     inkscape:cx="160.76202"
+     inkscape:cy="196.09078"
+     inkscape:window-width="2256"
+     inkscape:window-height="1398"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g1"
+       transform="matrix(0.63079555,0,0,0.63079555,76.356144,142.0598)">
+      <rect
+         style="fill:#000000"
+         id="rect1-8"
+         width="95.799461"
+         height="35.065353"
+         x="-93.943047"
+         y="-246.71683"
+         ry="5"
+         transform="rotate(-179.66964)" />
+      <rect
+         style="fill:#000000"
+         id="rect1-8-2"
+         width="95.799461"
+         height="35.065353"
+         x="-164.24323"
+         y="-166.49326"
+         ry="5"
+         transform="rotate(-179.66964)" />
+      <rect
+         style="fill:#000000"
+         id="rect1-8-2-1"
+         width="95.799461"
+         height="35.065353"
+         x="-124.80963"
+         y="-205.41101"
+         ry="5"
+         transform="rotate(-179.66964)" />
+      <rect
+         style="fill:#000000"
+         id="rect1-8-2-2-6-2"
+         width="95.799461"
+         height="35.065353"
+         x="182.31508"
+         y="14.869542"
+         ry="5"
+         transform="rotate(24.68494)" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:96px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000"
+       x="266.34033"
+       y="281.79724"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         x="266.34033"
+         y="281.79724"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:96px;font-family:'Ubuntu Mono';-inkscape-font-specification:'Ubuntu Mono Bold'">grt</tspan></text>
+  </g>
+</svg>
