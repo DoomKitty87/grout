@@ -4,6 +4,9 @@ import { ToastControl } from 'components/CurrentToast'
 import { useSQLiteContext, SQLiteDatabase } from 'expo-sqlite'
 import { useState, useEffect } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import bm25 from "wink-bm25-text-search";
+import nlp from "wink-nlp-utils";
+import WordPOS from "wordpos";
 
 interface Task {
   id: number;
@@ -24,7 +27,8 @@ export default function WorkScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   useEffect(() => {
     async function fetchTasks() {
-      setTasks(pickTasksToDo(db, availableTime));
+      const tasksToDo = await pickTasksToDo(db, availableTime)
+      setTasks(tasksToDo);
     }
     fetchTasks();
   }, [])
@@ -38,7 +42,7 @@ export default function WorkScreen() {
             <Button key={task.id} onPress={() => {
               const now = Date.now();
               const elapsedMinutes = Math.floor((now - lastFinishedTime) / 60000);
-              const timeToLog = Math.min(elapsedMinutes, (task as any).estimatedTime);
+              const timeToLog = Math.min(elapsedMinutes, (task as any).estimatedTime ? (task as any).estimatedTime : 0);
               db.execSync(`
                 UPDATE tasks
                 SET time_spent = time_spent + ${timeToLog},
@@ -59,7 +63,7 @@ export default function WorkScreen() {
           const now = Date.now();
           const elapsedMinutes = Math.floor((now - lastFinishedTime) / 60000);
           const task = tasks[0];
-          const timeToLog = Math.min(elapsedMinutes, (task as any).estimatedTime);
+          const timeToLog = Math.min(elapsedMinutes, (task as any).estimatedTime ? (task as any).estimatedTime : 0);
           db.execSync(`
             UPDATE tasks
             SET time_spent = time_spent + ${timeToLog}
@@ -108,38 +112,124 @@ function levenshtein (a: string, b: string): number {
   return matrix[bn][an];
 }
 
-function getUnfinishedTasks(db: SQLiteDatabase): [Task[], number[]] {
+async function expandSynonyms(text: string, wordpos: WordPOS): Promise<string> {
+  const tokens = nlp.string.tokenize0(text.toLowerCase());
+  const synonymPromises = tokens.map(async token => {
+    try {
+      const synonyms = await wordpos.lookupSynonyms(token)
+      return synonyms.flatMap(syn => syn.synonyms);
+    }
+    catch (e) {
+      return [];
+    }
+  });
+
+  const lists = await Promise.all(synonymPromises);
+  const uniqueSynonyms = new Set(tokens)
+
+  lists.flat().forEach(syn => uniqueSynonyms.add(syn.toLowerCase()));
+
+  return [...uniqueSynonyms].join(' ');
+}
+
+async function getUnfinishedTasks(db: SQLiteDatabase): Promise<[Task[], number[]]> {
   const ESTIMATION_SAMPLES = 5;
   const DEFAULT_ESTIMATE = 30; // in minutes
 
   const completedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 1;`);
   const uncompletedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 0;`);
+
+  const wordpos = new WordPOS();
+  const validTokens = new Set<string>();
+
+  function catchTokens(tokens: string[]): string[] {
+    tokens.forEach(token => validTokens.add(token));
+    return tokens;
+  }
+
+  const prepTasks = [
+    nlp.string.lowerCase,
+    nlp.string.removePunctuations,
+    nlp.string.tokenize0,
+    catchTokens,
+    nlp.tokens.stem
+  ]
+
+  const engine = bm25()
+  engine.defineConfig({ fldWeights: { title: 1 } })
+  engine.definePrepTasks(prepTasks)
+
+  console.log(`Indexing ${completedTasks.length} completed tasks for estimation...`);
+  completedTasks.forEach((task) => {
+    engine.addDoc({ title: task.title }, task.id.toString())
+  })
+  engine.consolidate()
+
+  function fuzzyMatchTokens(tokens: string[]): string[] {
+    const FUZZY_THRESHOLD = 0.8;
+    const matchedTokens: string[] = [];
+    tokens.forEach(token => {
+      let bestMatch = token;
+      let bestScore = 0;
+      validTokens.forEach(validToken => {
+        const distance = levenshtein(token, validToken);
+        const maxLen = Math.max(token.length, validToken.length);
+        const score = 1 - (distance / maxLen);
+        if (score > bestScore && score >= FUZZY_THRESHOLD) {
+          bestScore = score;
+          bestMatch = validToken;
+        }
+      });
+      matchedTokens.push(bestMatch);
+    });
+    return matchedTokens;
+  }
+
+  const prepTasksNew = [
+    nlp.string.lowerCase,
+    nlp.string.removePunctuations,
+    nlp.string.tokenize0,
+    fuzzyMatchTokens,
+    nlp.tokens.stem
+  ]
+
+  engine.definePrepTasks(prepTasksNew)
+
+  const taskById: { [id: number]: Task } = {}
+  completedTasks.forEach((task) => {
+    taskById[task.id] = task;
+  })
+
   const estimates: number[] = []
   for (const task of uncompletedTasks) {
-    const distances: { distance: number; time_spent: number }[] = [];
-    for (const completedTask of completedTasks) {
-      const distance = levenshtein(task.title, completedTask.title);
-      distances.push({ distance, time_spent: completedTask.time_spent });
-    }
+    const expandedTitle = await expandSynonyms(task.title, wordpos);
+    const results = engine.search(expandedTitle);
 
-    distances.sort((a, b) => a.distance - b.distance);
+    console.log(`Estimation results for task "${task.title}":`, results);
 
     let totalTime = 0;
-    let count = 0;
-    for (let i = 0; i < Math.min(ESTIMATION_SAMPLES, distances.length); i++) {
-      totalTime += distances[i].time_spent;
-      count++;
+    let totalScore = 0;
+    for (let i = 0; i < Math.min(ESTIMATION_SAMPLES, results.length); i++) {
+
+        totalTime += taskById[parseInt(results[i][0])].time_spent * results[i][1];
+        console.log(`  Considering completed task "${taskById[parseInt(results[i][0])].title}" with time spent ${taskById[parseInt(results[i][0])].time_spent} and score ${results[i][1]}`);
+        totalScore += results[i][1];
     }
 
-    const estimatedTime = count > 0 ? totalTime / count : DEFAULT_ESTIMATE;
+    console.log(`Total time: ${totalTime}, Total score: ${totalScore}`);
+
+    const estimatedTime = totalScore > 0 ? totalTime / totalScore : DEFAULT_ESTIMATE;
     estimates.push(estimatedTime);
   }
 
   return [uncompletedTasks, estimates];
 }
 
-function pickTasksToDo(db: SQLiteDatabase, availableTime: number): Task[] {
-  const [unfinishedTasks, estimates] = getUnfinishedTasks(db);
+async function pickTasksToDo(db: SQLiteDatabase, availableTime: number): Promise<Task[]> {
+  // Temporary function to just return all unfinished tasks
+  //return db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 0;`);
+
+  const [unfinishedTasks, estimates] = await getUnfinishedTasks(db);
 
   const categoryPriorities: { [category: string]: number } = {
     'Work': 3,
