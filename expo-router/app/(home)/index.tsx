@@ -22,7 +22,7 @@ interface Task {
   completed_at: string | null;
   time_spent: number;
   estimated_time: number;
-  embedding?: number[];
+  embedding?: string;
 }
 
 export default function HomeScreen() {
@@ -294,6 +294,7 @@ async function estimateTimesBM25(db: SQLiteDatabase, tasks: Task[]): Promise<num
 }
 
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
+  console.log('Calculating cosine similarity between', vecA.length, 'and', vecB.length, typeof vecA, typeof vecB);
   const dotProduct = vecA.reduce((sum, a, idx) => sum + a * (vecB[idx] || 0), 0);
   const magnitudeA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
   const magnitudeB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
@@ -308,19 +309,31 @@ async function estimateTimesEmbeddings(db: SQLiteDatabase, tasks: Task[]): Promi
   // Use embeddings stored in db to estimate task times
   const completedTasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE completed = 1;`)
 
+  const DEFAULT_ESTIMATE = 30; // in minutes
+  const ESTIMATION_SAMPLES = 5;
   let totalTime = 0;
   let totalSimilarity = 0;
 
   const estimates: number[] = []
 
   for (const task of tasks) {
+    const similarities: { similarity: number; timeSpent: number }[] = []
     for (const completedTask of completedTasks) {
-      const similarity = cosineSimilarity(task.embedding || [], completedTask.embedding || []);
+      const similarity = cosineSimilarity(JSON.parse(task.embedding || "[]"), JSON.parse(completedTask.embedding || "[]"));
       console.log(`Cosine similarity between "${task.title}" and completed task "${completedTask.title}": ${similarity}`);
-      totalTime += completedTask.time_spent * similarity;
-      totalSimilarity += similarity;
+      similarities.push({ similarity, timeSpent: completedTask.time_spent });
     }
-    const estimatedTime = totalSimilarity > 0 ? totalTime / totalSimilarity : 30;
+
+    similarities.sort((a, b) => b.similarity - a.similarity);
+
+    totalTime = 0;
+    totalSimilarity = 0;
+    for (let i = 0; i < Math.min(ESTIMATION_SAMPLES, similarities.length); i++) {
+      totalTime += similarities[i].timeSpent * similarities[i].similarity;
+      totalSimilarity += similarities[i].similarity;
+      console.log(`  Considering completed task with time spent ${similarities[i].timeSpent} and similarity ${similarities[i].similarity}`);
+    }
+    const estimatedTime = totalSimilarity > 0 ? totalTime / totalSimilarity : DEFAULT_ESTIMATE;
     console.log(`Estimated time for task "${task.title}": ${estimatedTime}`);
     estimates.push(estimatedTime);
   }
@@ -331,6 +344,9 @@ async function estimateTimesEmbeddings(db: SQLiteDatabase, tasks: Task[]): Promi
 async function fillEmbeddings(db: SQLiteDatabase): Promise<void> {
   // Fill in missing embeddings for tasks
   const tasks = db.getAllSync<Task>(`SELECT * FROM tasks WHERE embedding IS NULL OR embedding = '';`)
+  if (tasks.length === 0) {
+    return;
+  }
   console.log(process.env.EXPO_PUBLIC_OPENROUTER_API_KEY);
   const response = await fetch("https://openrouter.ai/api/v1/embeddings", {
     method: "POST",
@@ -352,10 +368,10 @@ async function fillEmbeddings(db: SQLiteDatabase): Promise<void> {
   for (let i = 0; i < tasks.length; i++) {
     const task = tasks[i];
     const embedding = embeddings.data[i].embedding;
-    console.log(`Storing embedding for task "${task.title}":`, embedding);
+    console.log(`Storing embedding for task "${task.title}":`, embedding[0], '...', embedding[embedding.length - 1]);
     await db.execAsync(`
       UPDATE tasks
-      SET embedding = ${new Blob(embedding)}
+      SET embedding = '${JSON.stringify(embedding)}'
       WHERE id = ${task.id};
     `);
   }

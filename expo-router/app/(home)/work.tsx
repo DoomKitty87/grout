@@ -13,7 +13,7 @@ interface Task {
   completed_at: string | null;
   time_spent: number;
   estimated_time: number;
-  embedding?: number[];
+  embedding?: string;
 }
 
 export default function WorkScreen() {
